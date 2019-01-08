@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
+import {DataService} from './data.service';
 
 @Component({
   selector: 'gpe-root',
@@ -9,8 +10,9 @@ import {HttpClient} from '@angular/common/http';
 export class AppComponent {
   public username: string;
   public repos: any;
-  constructor() {
+  constructor(public data: DataService) {
     this.username = localStorage.getItem('username');
+    this.data.getRepos();
   }
   setUsername(e) {
     if (e.keyCode === 13) {
