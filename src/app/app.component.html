@@ -1,6 +1,11 @@
 <div>
-  github.com/
-  <mat-form-field>
-    <input matInput placeholder="Username" [value]="username" (keydown)="setUsername($event)">
-  </mat-form-field>
+  <div>
+    github.com/
+    <mat-form-field>
+      <input matInput placeholder="Username" [value]="username" (keydown)="setUsername($event)">
+    </mat-form-field>
+  </div>
+  <gpe-repo-list class="gpe-repo-list" [repos]="data.repos"></gpe-repo-list>
+  <gpe-directory-viewer class="gpe-directory-viewer"></gpe-directory-viewer>
+  <gpe-file-viewer class="gpe-file-viewer"></gpe-file-viewer>
 </div>

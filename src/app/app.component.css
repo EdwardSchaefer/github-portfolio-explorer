@@ -1,0 +1,17 @@
+.gpe-repo-list {
+  display: inline-block;
+  vertical-align: top;
+  width: 20%
+}
+
+.gpe-directory-viewer {
+  display: inline-block;
+  vertical-align: top;
+  width: 35%;
+}
+
+.gpe-file-viewer {
+  display: inline-block;
+  vertical-align: top;
+  width: 35%;
+}
