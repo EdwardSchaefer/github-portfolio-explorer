@@ -52,16 +52,35 @@ export class DataService {
     });
   }
   getTree(url, path) {
-    this.http.get(url).toPromise().then(response => {
+    const recursiveURL = url + '?recursive=1';
+    this.http.get(recursiveURL).toPromise().then(response => {
+      const tree = [];
       if (path === this.repos[this.selectedIndex]) {
         response['tree'].map(a => {
           if (a.type === 'tree') {
-            a['children'] = [{path: '1'}, {path: '2'}];
+            a['children'] = [];
+          }
+          let foundNode = tree;
+          const pathArray = a['path'].split('/');
+          if (pathArray.length < 2) {
+            tree.push(a);
+          } else {
+            pathArray.map((pathFragment, i) => {
+              if (i < pathArray.length - 1) {
+                if (!i) {
+                  foundNode = foundNode.find(b => b['path'] === pathFragment);
+                } else {
+                  foundNode = foundNode['children'].find(b => b['path'] === pathFragment);
+                }
+              } else {
+                a['path'] = pathFragment;
+                foundNode['children'].push(a);
+              }
+            });
           }
         });
       }
-      path['tree'] = response;
-      this.dataChange.next(this.repos[this.selectedIndex].tree.tree);
+      this.dataChange.next(tree);
     });
   }
   get data() {
