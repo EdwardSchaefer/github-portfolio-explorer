@@ -15,19 +15,23 @@ export class DirectoryViewerComponent implements OnInit, OnChanges {
   constructor(public data: DataService) {
     this.nestedTreeControl = new NestedTreeControl<any>(this._getChildren);
     this.nestedDataSource = new MatTreeNestedDataSource();
-    data.dataChange.subscribe(selectedData => this.nestedDataSource.data = selectedData);
+    data.dataChange.subscribe(selectedData => {
+      this.nestedDataSource.data = selectedData;
+    });
   }
   ngOnInit() {}
   ngOnChanges() {
     this.tree = this.data.repos[this.data.selectedIndex];
     this.nestedDataSource.data = this.tree;
-    console.log(this.nestedDataSource);
   }
   endNode(node) {
-    console.log(node);
+    this.data.getFile(node['path']);
   }
   branchNode(node) {
     console.log(node);
+  }
+  getFileName(node) {
+    return node.path.split('/')[node['path'].split('/').length - 1];
   }
   hasNestedChild = (_: number, nodeData: any) => nodeData.type === 'tree';
   private _getChildren = (node) => node.children;

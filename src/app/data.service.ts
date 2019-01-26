@@ -10,7 +10,7 @@ export class DataService {
   username: string;
   selectedIndex: number;
   repos: any;
-  readme: any;
+  file: any;
   dataChange: any;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
@@ -37,9 +37,10 @@ export class DataService {
   }
   getReadme() {
     this.http.get((this.baseURL + '/repos/' + this.username + '/'  + this.repos[this.selectedIndex].name + '/readme')).toPromise().then( response => {
+      // this.http.get(response['html_url'], {responseType: 'text'}).toPromise().then(response2 => {
       this.http.get(response['download_url'], {responseType: 'text'}).toPromise().then(response2 => {
-        // FIXME: markdown
-        this.readme = response2;
+        // FIXME: markdown / pre / html
+        this.file = response2;
       });
     });
   }
@@ -68,12 +69,11 @@ export class DataService {
             pathArray.map((pathFragment, i) => {
               if (i < pathArray.length - 1) {
                 if (!i) {
-                  foundNode = foundNode.find(b => b['path'] === pathFragment);
+                  foundNode = foundNode.find(b => b['path'].split('/')[b['path'].split('/').length - 1] === pathFragment);
                 } else {
-                  foundNode = foundNode['children'].find(b => b['path'] === pathFragment);
+                  foundNode = foundNode['children'].find(b => b['path'].split('/')[b['path'].split('/').length - 1] === pathFragment);
                 }
               } else {
-                a['path'] = pathFragment;
                 foundNode['children'].push(a);
               }
             });
@@ -81,6 +81,12 @@ export class DataService {
         });
       }
       this.dataChange.next(tree);
+    });
+  }
+  getFile(path) {
+    //repos/:owner/:repo/contents/:path
+    this.http.get(this.baseURL + '/repos/' + this.username + '/' + this.repos[this.selectedIndex].name + '/contents/' + path).toPromise().then(response => {
+      this.file = atob(response['content']);
     });
   }
   get data() {

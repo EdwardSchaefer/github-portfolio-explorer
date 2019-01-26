@@ -1,12 +1,12 @@
 <div>
   <mat-tree [dataSource]="nestedDataSource" [treeControl]="nestedTreeControl">
     <mat-tree-node *matTreeNodeDef="let node" matNodeTreeToggle>
-      <mat-icon>insert_drive_file</mat-icon> <span (click)="endNode(node)">{{node.path}}</span>
+      <mat-icon>insert_drive_file</mat-icon> <span (click)="endNode(node)">{{getFileName(node)}}</span>
     </mat-tree-node>
     <mat-nested-tree-node *matTreeNodeDef="let node; when: hasNestedChild">
       <div>
-        <button mat-icon-button matTreeNodeToggle>
-          <mat-icon>folder</mat-icon> <span (click)="branchNode(node)">{{node.path}}</span>
+        <button matTreeNodeToggle color="primary">
+          <mat-icon>folder</mat-icon> <span (click)="branchNode(node)">{{getFileName(node)}}</span>
         </button>
         <ul [class.invisible]="!nestedTreeControl.isExpanded(node)">
           <ng-container matTreeNodeOutlet></ng-container>
