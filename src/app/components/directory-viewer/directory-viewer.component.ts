@@ -27,11 +27,15 @@ export class DirectoryViewerComponent implements OnInit, OnChanges {
   endNode(node) {
     this.data.getFile(node['path']);
   }
-  branchNode(node) {
-    console.log(node);
-  }
   getFileName(node) {
     return node.path.split('/')[node['path'].split('/').length - 1];
+  }
+  selected(node) {
+    if (node['path'] === this.data.selectedPath) {
+      return 'gpe-file-list-item-selected';
+    } else {
+      return 'gpe-file-list-item';
+    }
   }
   hasNestedChild = (_: number, nodeData: any) => nodeData.type === 'tree';
   private _getChildren = (node) => node.children;

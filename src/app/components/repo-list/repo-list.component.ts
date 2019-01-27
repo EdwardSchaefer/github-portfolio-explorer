@@ -17,4 +17,11 @@ export class RepoListComponent implements OnInit {
   selectRepo(i) {
     this.data.selectRepo(i);
   }
+  selected(index) {
+    if (index === this.data.selectedIndex) {
+      return 'gpe-repo-list-item-selected';
+    } else {
+      return 'gpe-repo-list-item';
+    }
+  }
 }

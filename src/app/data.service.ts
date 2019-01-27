@@ -9,6 +9,7 @@ export class DataService {
   baseURL: string;
   username: string;
   selectedIndex: number;
+  selectedPath: string;
   repos: any;
   file: any;
   dataChange: any;
@@ -84,7 +85,7 @@ export class DataService {
     });
   }
   getFile(path) {
-    //repos/:owner/:repo/contents/:path
+    this.selectedPath = path;
     this.http.get(this.baseURL + '/repos/' + this.username + '/' + this.repos[this.selectedIndex].name + '/contents/' + path).toPromise().then(response => {
       this.file = atob(response['content']);
     });

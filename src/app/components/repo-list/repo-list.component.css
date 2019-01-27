@@ -1,0 +1,11 @@
+.gpe-repo-list-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+.gpe-repo-list-item-selected {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background-color: red;
+}

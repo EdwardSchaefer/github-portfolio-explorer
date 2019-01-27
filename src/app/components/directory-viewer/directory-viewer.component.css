@@ -4,3 +4,12 @@
 .invisible {
   display: none;
 }
+.gpe-folder-button {
+  margin: 6px 0 6px 0;
+}
+.gpe-file-list-item {
+
+}
+.gpe-file-list-item-selected {
+  background-color: red;
+}

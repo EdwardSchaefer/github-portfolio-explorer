@@ -1,5 +1,11 @@
 <div>
-  <mat-list dense>
-    <mat-list-item *ngFor="let repo of repos; let i = index" (click)="selectRepo(i)">{{repo.name}}</mat-list-item>
-  </mat-list>
+  <div>
+    <button
+      [ngClass]="selected(i)"
+      mat-button
+      *ngFor="let repo of repos; let i = index"
+      (click)="selectRepo(i)">
+      {{repo.name}}
+    </button>
+  </div>
 </div>
