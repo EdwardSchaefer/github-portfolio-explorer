@@ -1,9 +1,12 @@
 <div>
+  <mat-form-field>
+    <input matInput (keyup)="filterRepos($event)" placeholder="Search">
+  </mat-form-field>
   <div>
     <button
       [ngClass]="selected(i)"
       mat-button
-      *ngFor="let repo of repos; let i = index"
+      *ngFor="let repo of filteredRepos; let i = index"
       (click)="selectRepo(repo, i)">
       {{repo.name}}
     </button>

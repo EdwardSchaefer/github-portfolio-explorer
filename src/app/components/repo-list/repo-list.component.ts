@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import {Component, OnInit, Input, OnChanges} from '@angular/core';
 import {DataService} from '../../data.service';
 
 @Component({
@@ -6,14 +6,13 @@ import {DataService} from '../../data.service';
   templateUrl: './repo-list.component.html',
   styleUrls: ['./repo-list.component.css']
 })
-export class RepoListComponent implements OnInit {
+export class RepoListComponent implements OnChanges {
   @Input('repos') repos;
-  constructor(public data: DataService) { }
-
-  ngOnInit() {
-
+  filteredRepos: any[] = [];
+  constructor(public data: DataService) {}
+  ngOnChanges() {
+    this.filteredRepos = this.repos;
   }
-
   selectRepo(repo, i) {
     this.data.selectRepo(repo, i);
   }
@@ -23,5 +22,8 @@ export class RepoListComponent implements OnInit {
     } else {
       return 'gpe-repo-list-item';
     }
+  }
+  filterRepos(event) {
+    this.filteredRepos = this.repos.filter(a => a['name'].includes(event.target.value));
   }
 }
