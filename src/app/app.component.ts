@@ -10,7 +10,6 @@ import {DataService} from './data.service';
 export class AppComponent {
   public username: string;
   public token: string;
-  public repos: any;
   constructor(public data: DataService) {
     this.username = localStorage.getItem('username');
     this.token = localStorage.getItem('token');

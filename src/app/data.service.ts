@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -12,17 +13,17 @@ export class DataService {
   selectedPath: string;
   repos: any;
   file: any;
-  dataChange: any;
+  constructedTree: any;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     this.username = localStorage.getItem('username');
-    this.dataChange = new BehaviorSubject<any>([]);
+    this.constructedTree = new BehaviorSubject<any>([]);
   }
   getRepos() {
     if (this.username) {
-      this.http.get(this.baseURL + '/users/' + this.username + '/repos').toPromise().then(response => {
+      this.http.get(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
         this.repos = response;
-      }).catch(error => {
+      }, error => {
         console.log(error);
         this.username = '';
         this.repos = [];
@@ -31,33 +32,33 @@ export class DataService {
       this.repos = [];
     }
   }
-  selectRepo(i) {
+  selectRepo(repo, i) {
     this.selectedIndex = i;
-    this.getReadme();
-    this.getCommits();
+    this.getReadme(repo);
+    this.getCommits(repo);
   }
-  getReadme() {
-    this.http.get((this.baseURL + '/repos/' + this.username + '/'  + this.repos[this.selectedIndex].name + '/readme')).toPromise().then( response => {
-      // this.http.get(response['html_url'], {responseType: 'text'}).toPromise().then(response2 => {
-      this.http.get(response['download_url'], {responseType: 'text'}).toPromise().then(response2 => {
-        // FIXME: markdown / pre / html
+  getReadme(repo) {
+    // FIXME: markdown / pre / html / response['html_url']
+    this.http.get((this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme')).pipe(
+      map(response => response['download_url'])
+    ).subscribe(response => {
+      this.http.get(response, {responseType: 'text'}).subscribe(response2 => {
         this.file = response2;
       });
     });
   }
-  getCommits() {
-    this.http.get((this.baseURL + '/repos/' + this.username + '/'  + this.repos[this.selectedIndex].name + '/commits')).toPromise().then(response => {
+  getCommits(repo) {
+    this.http.get((this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/commits')).toPromise().then(response => {
       // most recent commit
-      this.repos[this.selectedIndex].commits = response;
-      this.getTree(this.repos[this.selectedIndex].commits[0].commit.tree.url,
-        this.repos[this.selectedIndex]);
+      repo.commits = response;
+      this.getTree(repo);
+      // this.getTree(repo.commits[0].commit.tree.url, this.repos[this.selectedIndex]);
     });
   }
-  getTree(url, path) {
-    const recursiveURL = url + '?recursive=1';
-    this.http.get(recursiveURL).toPromise().then(response => {
+  getTree(repo) {
+    const recursiveURL = repo.commits[0].commit.tree.url + '?recursive=1';
+    this.http.get(recursiveURL).subscribe(response => {
       const tree = [];
-      if (path === this.repos[this.selectedIndex]) {
         response['tree'].map(a => {
           if (a.type === 'tree') {
             a['children'] = [];
@@ -80,17 +81,16 @@ export class DataService {
             });
           }
         });
-      }
-      this.dataChange.next(tree);
+      this.constructedTree.next(tree);
     });
   }
   getFile(path) {
     this.selectedPath = path;
-    this.http.get(this.baseURL + '/repos/' + this.username + '/' + this.repos[this.selectedIndex].name + '/contents/' + path).toPromise().then(response => {
+    this.http.get(this.baseURL + '/repos/' + this.username + '/' + this.repos[this.selectedIndex].name + '/contents/' + path).subscribe(response => {
       this.file = atob(response['content']);
     });
   }
   get data() {
-    return this.dataChange.value;
+    return this.constructedTree.value;
   }
 }

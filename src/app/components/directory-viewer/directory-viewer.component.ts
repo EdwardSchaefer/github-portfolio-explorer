@@ -15,7 +15,7 @@ export class DirectoryViewerComponent implements OnInit, OnChanges {
   constructor(public data: DataService) {
     this.nestedTreeControl = new NestedTreeControl<any>(this._getChildren);
     this.nestedDataSource = new MatTreeNestedDataSource();
-    data.dataChange.subscribe(selectedData => {
+    data.constructedTree.subscribe(selectedData => {
       this.nestedDataSource.data = selectedData;
     });
   }

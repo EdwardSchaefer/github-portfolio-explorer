@@ -14,8 +14,8 @@ export class RepoListComponent implements OnInit {
 
   }
 
-  selectRepo(i) {
-    this.data.selectRepo(i);
+  selectRepo(repo, i) {
+    this.data.selectRepo(repo, i);
   }
   selected(index) {
     if (index === this.data.selectedIndex) {
