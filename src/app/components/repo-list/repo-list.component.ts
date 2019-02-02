@@ -1,10 +1,12 @@
-import {Component, OnInit, Input, OnChanges} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {DataService} from '../../data.service';
+import {RepoListAnimations} from './repo-list.animations';
 
 @Component({
   selector: 'gpe-repo-list',
   templateUrl: './repo-list.component.html',
-  styleUrls: ['./repo-list.component.css']
+  styleUrls: ['./repo-list.component.css'],
+  animations: [RepoListAnimations]
 })
 export class RepoListComponent implements OnChanges {
   @Input('repos') repos;

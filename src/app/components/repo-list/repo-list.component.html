@@ -4,6 +4,7 @@
   </mat-form-field>
   <div>
     <button
+      [@repoList]
       [ngClass]="selected(i)"
       mat-button
       *ngFor="let repo of filteredRepos; let i = index"
