@@ -6,7 +6,7 @@ export const DirectoryViewerAnimations = [
       query(':enter, .gpe-folder-button',
         sequence([
           style({ 'minHeight': '0px', height: '0px' }),
-          animate('1.25s ease-out', style({ height: '*'})),
+          animate('0.25s ease-out', style({ height: '*'})),
         ]),
         {optional: true}
       )
@@ -15,7 +15,7 @@ export const DirectoryViewerAnimations = [
       query(':leave, gpe-folder-button',
         sequence([
           style({ 'minHeight': '*', height: '*' }),
-          animate('1.25s ease-in', style({ 'minHeight': '0', height: '0px'})),
+          animate('0.25s ease-in', style({ 'minHeight': '0', height: '0px'})),
         ]),
         {optional: true}
       )

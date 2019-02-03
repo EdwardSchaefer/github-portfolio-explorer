@@ -38,13 +38,9 @@ export class DataService {
     this.getCommits(repo);
   }
   getReadme(repo) {
-    // FIXME: markdown / pre / html / response['html_url']
-    this.http.get((this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme')).pipe(
-      map(response => response['download_url'])
-    ).subscribe(response => {
-      this.http.get(response, {responseType: 'text'}).subscribe(response2 => {
-        this.file = response2;
-      });
+    const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
+    this.http.get(url, {responseType: 'text'}).subscribe(response => {
+      console.log(response);
     });
   }
   getCommits(repo) {

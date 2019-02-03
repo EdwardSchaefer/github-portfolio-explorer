@@ -6,8 +6,17 @@ import {HttpEvent, HttpHandler, HttpHeaders, HttpInterceptor, HttpRequest} from 
 })
 export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler) {
-    let token: string = localStorage.getItem('token');
-    if (req['url'].slice(8, 11) === 'api') {
+    const token: string = localStorage.getItem('token');
+    if (req['url'].slice(req['url'].length - 7, req['url'].length) === '/readme') {
+      const headers = new HttpHeaders({
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3.html'
+      });
+      const authReq = req.clone({
+        headers: headers
+      });
+      return next.handle(authReq);
+    } else if (req['url'].slice(8, 11) === 'api') {
       const headers = new HttpHeaders({
         'Authorization': 'token ' + token
       });
