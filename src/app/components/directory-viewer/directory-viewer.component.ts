@@ -2,11 +2,13 @@ import {Component, OnChanges, OnInit} from '@angular/core';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {DataService} from '../../data.service';
+import {DirectoryViewerAnimations} from './directory-viewer-animations';
 
 @Component({
   selector: 'gpe-directory-viewer',
   templateUrl: './directory-viewer.component.html',
-  styleUrls: ['./directory-viewer.component.css']
+  styleUrls: ['./directory-viewer.component.css'],
+  animations: [DirectoryViewerAnimations]
 })
 export class DirectoryViewerComponent implements OnInit, OnChanges {
   nestedTreeControl: NestedTreeControl<any>;

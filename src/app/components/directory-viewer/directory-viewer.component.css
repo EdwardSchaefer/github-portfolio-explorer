@@ -5,7 +5,9 @@
   display: none;
 }
 .gpe-folder-button {
-  margin: 6px 0 6px 0;
+  display: block;
+  height: 48px;
+  overflow: hidden;
 }
 .gpe-file-list-item {
 
