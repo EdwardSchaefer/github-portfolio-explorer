@@ -13,11 +13,13 @@ export class DataService {
   selectedPath: string;
   repos: any;
   file: any;
+  readme: any;
   constructedTree: any;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     this.username = localStorage.getItem('username');
     this.constructedTree = new BehaviorSubject<any>([]);
+    this.readme = new BehaviorSubject<string>('');
   }
   getRepos() {
     if (this.username) {
@@ -40,7 +42,8 @@ export class DataService {
   getReadme(repo) {
     const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
     this.http.get(url, {responseType: 'text'}).subscribe(response => {
-      console.log(response);
+      this.file = null;
+      this.readme.next(response);
     });
   }
   getCommits(repo) {
