@@ -1,2 +1,2 @@
 <pre>{{data.file}}</pre>
-<div [innerHTML]="htmlData"></div>
+<div *ngIf="!data.file" [innerHTML]="htmlData"></div>

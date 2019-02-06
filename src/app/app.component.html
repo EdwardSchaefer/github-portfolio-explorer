@@ -1,12 +1,12 @@
-<div>
-  <div>
+<div class="gpe-app-container">
+  <div class="username-field-container">
     github.com/
     <mat-form-field>
       <input matInput placeholder="Username" [value]="username" (keydown)="setUsername($event)">
     </mat-form-field>
   </div>
-  <div>
-    <mat-form-field>
+  <div class="token-field-container">
+    <mat-form-field class="token-field">
       <input matInput placeholder="Personal Access Token" [value]="token" (keydown)="setToken($event)">
     </mat-form-field>
   </div>

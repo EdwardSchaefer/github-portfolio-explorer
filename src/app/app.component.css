@@ -1,17 +1,40 @@
 .gpe-repo-list {
   display: inline-block;
   vertical-align: top;
-  width: 20%
+  height: 100%;
+  width: 20%;
+  overflow-y: auto;
 }
 
 .gpe-directory-viewer {
   display: inline-block;
   vertical-align: top;
+  height: 100%;
   width: 35%;
+  overflow-y: auto;
 }
 
 .gpe-file-viewer {
   display: inline-block;
   vertical-align: top;
-  width: 35%;
+  height: 100%;
+  width: 45%;
+  overflow-y: auto;
+}
+.gpe-app-container {
+  height: 100%;
+  overflow: hidden;
+}
+.username-field-container {
+  position: absolute;
+  left: 16px;
+  bottom: 65px;
+}
+.token-field-container {
+  position: absolute;
+  left: 16px;
+  bottom: 0;
+}
+.token-field {
+  width: 200%;
 }
