@@ -4,6 +4,9 @@
 .invisible {
   display: none;
 }
+.gpe-file-button {
+  height: 48px;
+}
 .gpe-folder-button {
   display: block;
   height: 48px;
