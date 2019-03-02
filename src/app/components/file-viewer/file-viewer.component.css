@@ -1,0 +1,24 @@
+.gpe-file-container {
+  padding: 5px;
+  background-color: #aaaadd;
+  display: flex;
+  justify-content: space-between;
+}
+.gpe-file-contents {
+  display: inline-block;
+  font-family: monospace;
+  white-space: pre;
+  width: 100%;
+}
+.gpe-file-lines {
+  color: #888888;
+  display: inline-block;
+  font-family: monospace;
+  vertical-align: top;
+  margin: 0 10px 0 0;
+}
+.gpe-file-line-count {
+  display: block;
+  font-family: monospace;
+  vertical-align: top;
+}

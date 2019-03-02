@@ -13,6 +13,7 @@ export class DataService {
   selectedPath: string;
   repos: any;
   file: any;
+  newLineCounter: any;
   readme: any;
   constructedTree: any;
   constructor(public http: HttpClient) {
@@ -87,6 +88,7 @@ export class DataService {
     this.selectedPath = path;
     this.http.get(this.baseURL + '/repos/' + this.username + '/' + this.repos[this.selectedIndex].name + '/contents/' + path).subscribe(response => {
       this.file = atob(response['content']);
+      this.newLineCounter = this.file.split(/\r\n|\r|\n/);
     });
   }
   get data() {
