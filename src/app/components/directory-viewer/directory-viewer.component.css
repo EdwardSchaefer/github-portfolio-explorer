@@ -18,3 +18,8 @@
 .gpe-file-list-item-selected {
   background-color: red;
 }
+.gpe-branch-icon {
+  position: relative;
+  display: inline-block;
+  top: 10px;
+}

@@ -1,4 +1,4 @@
-import {Component, OnChanges, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnChanges, ViewChild} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {DataService} from '../../data.service';
@@ -21,7 +21,8 @@ interface TreeNode {
   styleUrls: ['./directory-viewer.component.css'],
   animations: [DirectoryViewerAnimations]
 })
-export class DirectoryViewerComponent implements OnInit, OnChanges {
+export class DirectoryViewerComponent implements AfterViewInit {
+  @ViewChild('branchSelect') branchSelect;
   private transformer = (node: TreeNode, level: number) => {
     return {
       expandable: !!node.children && node.children.length > 0,
@@ -34,18 +35,33 @@ export class DirectoryViewerComponent implements OnInit, OnChanges {
       node => node.expandable, node => node.children);
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
   tree: any;
+  branches: any[] = [];
+  selectedBranch: any;
   constructor(public data: DataService) {
     data.constructedTree.subscribe(selectedData => {
       this.dataSource.data = selectedData;
     });
+    data.branches.subscribe(branches => {
+      if (branches && this.branchSelect) {
+        this.branches = branches;
+      }
+    });
   }
-  ngOnInit() {}
-  ngOnChanges() {
-    this.tree = this.data.repos[this.data.selectedIndex];
-    this.dataSource.data = this.tree;
+  ngAfterViewInit() {
+    this.branchSelect.valueChange.subscribe(selectedBranch => {
+      this.selectedBranch = this.branches.find(branch => branch['name'] === selectedBranch);
+      this.data.getCommits(this.selectedBranch.commit.url);
+    });
   }
+
   endNode(node) {
-    this.data.getFile(node['name']);
+    let branchName: string;
+    if (this.selectedBranch) {
+      branchName = this.selectedBranch.name;
+    } else {
+      branchName = 'master';
+    }
+    this.data.getFile(node['name'], branchName);
   }
   getFileName(node) {
     return node.name.split('/')[node['name'].split('/').length - 1];
