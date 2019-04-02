@@ -14,14 +14,14 @@ export class DataService {
   selectedRepo: Repo;
   file: any;
   newLineCounter: any;
-  readme: any;
-  constructedTree: any;
-  branches: any;
+  readme: BehaviorSubject<string>;
+  constructedTree: BehaviorSubject<any>;
+  branches: BehaviorSubject<Branch[]>;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     this.username = localStorage.getItem('username');
     this.constructedTree = new BehaviorSubject<any>([]);
-    this.branches = new BehaviorSubject<any>([]);
+    this.branches = new BehaviorSubject<Branch[]>([]);
     this.readme = new BehaviorSubject<string>('');
   }
   getRepos() {
@@ -43,32 +43,26 @@ export class DataService {
     this.getReadme(repo);
     this.getBranches(repo);
     this.selectedRepo = repo;
+    this.file = '';
   }
   getReadme(repo) {
-    const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
-    this.http.get(url, {responseType: 'text'}).subscribe(response => {
-      this.file = null;
-      this.readme.next(response);
-      repo.readme = response;
-    });
+    if (repo.readme) {
+      this.readme.next(repo.readme);
+    } else {
+      const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
+      this.http.get(url, {responseType: 'text'}).subscribe(response => {
+        this.file = null;
+        this.readme.next(response);
+        repo.readme = response;
+      });
+    }
   }
   getBranches(repo: Repo) {
     this.http.get((this.baseURL + '/repos/' + this.username + '/' + repo.name + '/branches')).subscribe((branches: any[]) => {
       repo.branches = branches.map(branch => {
         return new Branch(branch.name, branch.commit.url);
       });
-      this.branches.next(branches);
-      this.file = '';
-      this.readme.next('');
-      const masterBranch = repo.branches.find(branch => branch['name'] === 'master');
-      let defaultBranch: Branch;
-      if (masterBranch) {
-        defaultBranch = masterBranch;
-      } else {
-        defaultBranch = this.branches[0];
-      }
-      repo.selectedBranch = defaultBranch;
-      this.getCommits(defaultBranch.commitUrl);
+      this.branches.next(repo.branches);
     });
   }
   getCommits(url) {
@@ -122,7 +116,6 @@ export class DataService {
 export class Repo {
   name: string;
   branches: Branch[];
-  selectedBranch: Branch;
   readme: string;
   constructor(name) {
     this.name = name;
