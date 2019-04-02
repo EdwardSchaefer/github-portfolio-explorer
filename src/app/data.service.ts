@@ -10,7 +10,8 @@ export class DataService {
   username: string;
   selectedIndex: number;
   selectedPath: string;
-  repos: any;
+  repos: Repo[];
+  selectedRepo: Repo;
   file: any;
   newLineCounter: any;
   readme: any;
@@ -25,11 +26,11 @@ export class DataService {
   }
   getRepos() {
     if (this.username) {
-      this.http.get(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
-        // console.log('repos: ', response);
-        this.repos = response;
+      this.http.get<Repo[]>(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
+        this.repos = response.map(repo => {
+          return new Repo(repo.name);
+        });
       }, error => {
-        console.log(error);
         this.username = '';
         this.repos = [];
       });
@@ -41,27 +42,33 @@ export class DataService {
     this.selectedIndex = i;
     this.getReadme(repo);
     this.getBranches(repo);
+    this.selectedRepo = repo;
   }
   getReadme(repo) {
     const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
     this.http.get(url, {responseType: 'text'}).subscribe(response => {
       this.file = null;
       this.readme.next(response);
+      repo.readme = response;
     });
   }
-  getBranches(repo) {
+  getBranches(repo: Repo) {
     this.http.get((this.baseURL + '/repos/' + this.username + '/' + repo.name + '/branches')).subscribe((branches: any[]) => {
+      repo.branches = branches.map(branch => {
+        return new Branch(branch.name, branch.commit.url);
+      });
       this.branches.next(branches);
       this.file = '';
       this.readme.next('');
-      const masterBranch = branches.find(branch => branch['name'] === 'master');
-      let defaultBranch: any;
+      const masterBranch = repo.branches.find(branch => branch['name'] === 'master');
+      let defaultBranch: Branch;
       if (masterBranch) {
         defaultBranch = masterBranch;
       } else {
         defaultBranch = this.branches[0];
       }
-      this.getCommits(defaultBranch.commit.url);
+      repo.selectedBranch = defaultBranch;
+      this.getCommits(defaultBranch.commitUrl);
     });
   }
   getCommits(url) {
@@ -110,4 +117,32 @@ export class DataService {
   get data() {
     return this.constructedTree.value;
   }
+}
+
+export class Repo {
+  name: string;
+  branches: Branch[];
+  selectedBranch: Branch;
+  readme: string;
+  constructor(name) {
+    this.name = name;
+  }
+}
+
+export class Branch {
+  name: string;
+  commitUrl: string;
+  commits: Commit[];
+  constructor(name, commitUrl) {
+    this.name = name;
+    this.commitUrl = commitUrl;
+  }
+}
+
+export class Commit {
+  tree: Tree;
+}
+
+export class Tree {
+  path: any;
 }

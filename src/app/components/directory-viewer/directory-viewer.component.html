@@ -2,7 +2,9 @@
   <div class="gpe-branch-icon"><mat-icon>device_hub</mat-icon></div>
   <mat-form-field>
     <mat-select #branchSelect>
-      <mat-option *ngFor="let branch of branches" [value]="branch.name">{{branch.name}}</mat-option>
+      <span *ngIf="data.selectedRepoSubj | async">
+        <mat-option *ngFor="let branch of data.selectedRepo.branches" [value]="branch.name">{{branch.name}}</mat-option>
+      </span>
     </mat-select>
   </mat-form-field>
 </div>
