@@ -10,6 +10,8 @@ import { DirectoryViewerComponent } from './components/directory-viewer/director
 import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
 import {AuthInterceptor} from './auth.interceptor';
 import {FormsModule} from '@angular/forms';
+import {RouterModule} from '@angular/router';
+import {AppRoutingModule} from './app-routing.module';
 
 @NgModule({
   declarations: [
@@ -28,7 +30,9 @@ import {FormsModule} from '@angular/forms';
     MatIconModule,
     MatTreeModule,
     MatButtonModule,
-    MatSelectModule
+    MatSelectModule,
+    AppRoutingModule,
+    RouterModule
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}
