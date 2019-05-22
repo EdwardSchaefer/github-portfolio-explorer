@@ -4,12 +4,21 @@
 .invisible {
   display: none;
 }
+.mat-tree-node {
+  min-height: 24px;
+}
 .gpe-file-button {
-  height: 48px;
+  height: 36px;
+  width: 100%;
+  color: #000000;
+  text-align: left;
 }
 .gpe-folder-button {
+  height: 36px;
+  width: 100%;
+  color: #000000;
+  text-align: left;
   display: block;
-  height: 48px;
   overflow: hidden;
 }
 .gpe-file-list-item {

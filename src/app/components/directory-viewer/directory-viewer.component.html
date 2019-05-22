@@ -1,20 +1,22 @@
 <div>
   <div class="gpe-branch-icon"><mat-icon>device_hub</mat-icon></div>
   <mat-form-field>
-    <mat-select #branchSelect>
-      <mat-option *ngFor="let branch of branches" [value]="branch.name">{{branch.name}}</mat-option>
+    <mat-select #branchSelect [(value)]="selectedBranch">
+      <span *ngIf="data.selectedRepo">
+        <mat-option *ngFor="let branch of data.selectedRepo.branches" [value]="branch">{{branch.name}}</mat-option>
+      </span>
     </mat-select>
   </mat-form-field>
 </div>
 <div>
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <mat-tree-node [@directoryViewer] *matTreeNodeDef="let node" matTreeNodePadding [ngClass]="selected(node)">
-      <button color="primary" mat-raised-button class="gpe-file-button" (click)="endNode(node)">
+      <button mat-button class="gpe-file-button" (click)="endNode(node)">
         <mat-icon>insert_drive_file</mat-icon>&nbsp;<span>{{getFileName(node)}}</span>
       </button>
     </mat-tree-node>
     <mat-tree-node [@directoryViewer] *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
-      <button color="primary" mat-raised-button matTreeNodeToggle class="gpe-folder-button">
+      <button mat-button matTreeNodeToggle class="gpe-folder-button">
         <mat-icon>folder</mat-icon>&nbsp;<span>{{getFileName(node)}}</span>
       </button>
     </mat-tree-node>

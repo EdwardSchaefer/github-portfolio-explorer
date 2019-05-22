@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnChanges, ViewChild} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {FlatTreeControl} from '@angular/cdk/tree';
-import {DataService} from '../../data.service';
+import {Branch, DataService} from '../../data.service';
 import {DirectoryViewerAnimations} from './directory-viewer-animations';
 
 interface FlatNode {
@@ -44,13 +44,21 @@ export class DirectoryViewerComponent implements AfterViewInit {
     data.branches.subscribe(branches => {
       if (branches && this.branchSelect) {
         this.branches = branches;
+        const masterBranch = this.branches.find(branch => branch['name'] === 'master');
+        let defaultBranch: Branch;
+        if (masterBranch) {
+          defaultBranch = masterBranch;
+        } else {
+          defaultBranch = this.branches[0];
+        }
+        this.selectedBranch = defaultBranch;
+        this.data.getCommits(this.selectedBranch.commitUrl);
       }
     });
   }
   ngAfterViewInit() {
     this.branchSelect.valueChange.subscribe(selectedBranch => {
-      this.selectedBranch = this.branches.find(branch => branch['name'] === selectedBranch);
-      this.data.getCommits(this.selectedBranch.commit.url);
+      this.data.getCommits(this.selectedBranch.commitUrl);
     });
   }
 

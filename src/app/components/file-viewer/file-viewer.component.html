@@ -6,4 +6,7 @@
   </div>
   <div class="gpe-file-contents">{{data.file}}</div>
 </div>
-<div *ngIf="!data.file" [innerHTML]="htmlData"></div>
+<div *ngIf="!data.file">
+  <div *ngIf="data.selectedRepo" [innerHTML]="htmlData"></div>
+</div>
+

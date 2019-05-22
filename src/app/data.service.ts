@@ -10,26 +10,27 @@ export class DataService {
   username: string;
   selectedIndex: number;
   selectedPath: string;
-  repos: any;
+  repos: Repo[];
+  selectedRepo: Repo;
   file: any;
   newLineCounter: any;
-  readme: any;
-  constructedTree: any;
-  branches: any;
+  readme: BehaviorSubject<string>;
+  constructedTree: BehaviorSubject<any>;
+  branches: BehaviorSubject<Branch[]>;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     this.username = localStorage.getItem('username');
     this.constructedTree = new BehaviorSubject<any>([]);
-    this.branches = new BehaviorSubject<any>([]);
+    this.branches = new BehaviorSubject<Branch[]>([]);
     this.readme = new BehaviorSubject<string>('');
   }
   getRepos() {
     if (this.username) {
-      this.http.get(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
-        // console.log('repos: ', response);
-        this.repos = response;
+      this.http.get<Repo[]>(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
+        this.repos = response.map(repo => {
+          return new Repo(repo.name);
+        });
       }, error => {
-        console.log(error);
         this.username = '';
         this.repos = [];
       });
@@ -41,27 +42,27 @@ export class DataService {
     this.selectedIndex = i;
     this.getReadme(repo);
     this.getBranches(repo);
+    this.selectedRepo = repo;
+    this.file = '';
   }
   getReadme(repo) {
-    const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
-    this.http.get(url, {responseType: 'text'}).subscribe(response => {
-      this.file = null;
-      this.readme.next(response);
-    });
+    if (repo.readme) {
+      this.readme.next(repo.readme);
+    } else {
+      const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
+      this.http.get(url, {responseType: 'text'}).subscribe(response => {
+        this.file = null;
+        this.readme.next(response);
+        repo.readme = response;
+      });
+    }
   }
-  getBranches(repo) {
+  getBranches(repo: Repo) {
     this.http.get((this.baseURL + '/repos/' + this.username + '/' + repo.name + '/branches')).subscribe((branches: any[]) => {
-      this.branches.next(branches);
-      this.file = '';
-      this.readme.next('');
-      const masterBranch = branches.find(branch => branch['name'] === 'master');
-      let defaultBranch: any;
-      if (masterBranch) {
-        defaultBranch = masterBranch;
-      } else {
-        defaultBranch = this.branches[0];
-      }
-      this.getCommits(defaultBranch.commit.url);
+      repo.branches = branches.map(branch => {
+        return new Branch(branch.name, branch.commit.url);
+      });
+      this.branches.next(repo.branches);
     });
   }
   getCommits(url) {
@@ -110,4 +111,31 @@ export class DataService {
   get data() {
     return this.constructedTree.value;
   }
+}
+
+export class Repo {
+  name: string;
+  branches: Branch[];
+  readme: string;
+  constructor(name) {
+    this.name = name;
+  }
+}
+
+export class Branch {
+  name: string;
+  commitUrl: string;
+  commits: Commit[];
+  constructor(name, commitUrl) {
+    this.name = name;
+    this.commitUrl = commitUrl;
+  }
+}
+
+export class Commit {
+  tree: Tree;
+}
+
+export class Tree {
+  path: any;
 }
