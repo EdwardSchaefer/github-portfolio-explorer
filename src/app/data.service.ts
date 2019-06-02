@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject} from 'rxjs';
+import {environment} from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,21 +20,31 @@ export class DataService {
   branches: BehaviorSubject<Branch[]>;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
-    this.username = localStorage.getItem('username');
+    if (environment.username) {
+      this.username = environment.username;
+    } else {
+      this.username = localStorage.getItem('username');
+    }
     this.constructedTree = new BehaviorSubject<any>([]);
     this.branches = new BehaviorSubject<Branch[]>([]);
     this.readme = new BehaviorSubject<string>('');
   }
   getRepos() {
     if (this.username) {
-      this.http.get<Repo[]>(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
-        this.repos = response.map(repo => {
-          return new Repo(repo.name);
+      if (environment.repos) {
+        this.repos = environment.repos.map(repo => {
+          return new Repo(repo);
         });
-      }, error => {
-        this.username = '';
-        this.repos = [];
-      });
+      } else {
+        this.http.get<Repo[]>(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
+          this.repos = response.map(repo => {
+            return new Repo(repo.name);
+          });
+        }, error => {
+          this.username = '';
+          this.repos = [];
+        });
+      }
     } else {
       this.repos = [];
     }

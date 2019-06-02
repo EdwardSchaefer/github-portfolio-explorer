@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DataService} from './data.service';
+import {environment} from '../environments/environment';
 
 @Component({
   selector: 'gpe-root',
@@ -10,9 +11,19 @@ import {DataService} from './data.service';
 export class AppComponent {
   public username: string;
   public token: string;
+  public envUsername: boolean;
+  public envAPIToken: boolean;
   constructor(public data: DataService) {
-    this.username = localStorage.getItem('username');
-    this.token = localStorage.getItem('token');
+    if (environment.username) {
+      this.envUsername = true;
+    } else {
+      this.username = localStorage.getItem('username');
+    }
+    if (environment.APItoken) {
+      this.envAPIToken = true;
+    } else {
+      this.token = localStorage.getItem('token');
+    }
     this.data.getRepos();
   }
   setUsername(e) {
