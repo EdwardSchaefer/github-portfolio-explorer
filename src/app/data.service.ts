@@ -31,7 +31,7 @@ export class DataService {
   }
   getRepos() {
     if (this.username) {
-      if (environment.repos) {
+      if (environment.repos.length) {
         this.repos = environment.repos.map(repo => {
           return new Repo(repo);
         });
