@@ -18,6 +18,7 @@ export class DataService {
   readme: BehaviorSubject<string>;
   constructedTree: BehaviorSubject<any>;
   branches: BehaviorSubject<Branch[]>;
+  commits: BehaviorSubject<Commit[]>;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     if (environment.username) {
@@ -27,18 +28,19 @@ export class DataService {
     }
     this.constructedTree = new BehaviorSubject<any>([]);
     this.branches = new BehaviorSubject<Branch[]>([]);
+    this.commits = new BehaviorSubject<Commit[]>([]);
     this.readme = new BehaviorSubject<string>('');
   }
   getRepos() {
     if (this.username) {
       if (environment.repos.length) {
         this.repos = environment.repos.map(repo => {
-          return new Repo(repo);
+          return new Repo(repo, repo['default_branch']);
         });
       } else {
         this.http.get<Repo[]>(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
           this.repos = response.map(repo => {
-            return new Repo(repo.name);
+            return new Repo(repo.name, repo['default_branch']);
           });
         }, error => {
           this.username = '';
@@ -71,9 +73,11 @@ export class DataService {
   getBranches(repo: Repo) {
     this.http.get((this.baseURL + '/repos/' + this.username + '/' + repo.name + '/branches')).subscribe((branches: any[]) => {
       repo.branches = branches.map(branch => {
-        return new Branch(branch.name, branch.commit.url);
+        return new Branch(branch.name, branch.commit.url, branch.commit.sha);
       });
+      repo.branches.sort((a, b) => a.name === repo.defaultBranch ? -1 : 1);
       this.branches.next(repo.branches);
+      this.getAllCommits(repo);
     });
   }
   getCommits(url) {
@@ -82,32 +86,51 @@ export class DataService {
       this.getTree(response.commit.tree);
     });
   }
+  getAllCommits(repo) {
+    this.http.get((this.baseURL + '/repos/' + this.username + '/' + repo.name + '/commits')).subscribe((commits: any[]) => {
+      repo.branches.map(branch => {
+        const foundCommit = commits.find(commit => commit['sha'] === branch['headSha']);
+        if (foundCommit) {
+          foundCommit.branch = branch.name;
+        }
+      });
+      commits.map((commit, i) => {
+        commit['parents'].map(parent => {
+          const foundParent = commits.find(a => a['sha'] === parent['sha']);
+          if (foundParent && !foundParent['branch']) {
+            foundParent['branch'] = commit.branch;
+          }
+        });
+      });
+      this.commits.next(commits);
+    });
+  }
   getTree(commitTree) {
     const recursiveURL = commitTree.url + '?recursive=1';
     this.http.get(recursiveURL).subscribe(response => {
       const tree = [];
-        response['tree'].map(a => {
-          if (a.type === 'tree') {
-            a['children'] = [];
-          }
-          let foundNode = tree;
-          const pathArray = a['path'].split('/');
-          if (pathArray.length < 2) {
-            tree.push(a);
-          } else {
-            pathArray.map((pathFragment, i) => {
-              if (i < pathArray.length - 1) {
-                if (!i) {
-                  foundNode = foundNode.find(b => b['path'].split('/')[b['path'].split('/').length - 1] === pathFragment);
-                } else {
-                  foundNode = foundNode['children'].find(b => b['path'].split('/')[b['path'].split('/').length - 1] === pathFragment);
-                }
+      response['tree'].map(a => {
+        if (a.type === 'tree') {
+          a['children'] = [];
+        }
+        let foundNode = tree;
+        const pathArray = a['path'].split('/');
+        if (pathArray.length < 2) {
+          tree.push(a);
+        } else {
+          pathArray.map((pathFragment, i) => {
+            if (i < pathArray.length - 1) {
+              if (!i) {
+                foundNode = foundNode.find(b => b['path'].split('/')[b['path'].split('/').length - 1] === pathFragment);
               } else {
-                foundNode['children'].push(a);
+                foundNode = foundNode['children'].find(b => b['path'].split('/')[b['path'].split('/').length - 1] === pathFragment);
               }
-            });
-          }
-        });
+            } else {
+              foundNode['children'].push(a);
+            }
+          });
+        }
+      });
       this.constructedTree.next(tree);
     });
   }
@@ -128,18 +151,22 @@ export class Repo {
   name: string;
   branches: Branch[];
   readme: string;
-  constructor(name) {
+  defaultBranch: string;
+  constructor(name, defaultBranch) {
     this.name = name;
+    this.defaultBranch = defaultBranch;
   }
 }
 
 export class Branch {
   name: string;
   commitUrl: string;
+  headSha: string;
   commits: Commit[];
-  constructor(name, commitUrl) {
+  constructor(name, commitUrl, sha) {
     this.name = name;
     this.commitUrl = commitUrl;
+    this.headSha = sha;
   }
 }
 

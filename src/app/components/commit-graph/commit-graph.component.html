@@ -1,0 +1,8 @@
+<div *ngIf="commits.length">
+  <div class="branch-column" *ngFor="let branch of branches">
+    <div class="commit-space" (click)="selectCommit(commit)" *ngFor="let commit of commits">
+      <div class="commit-node" (click)="selectCommit(commit)" *ngIf="commit.branch === branch.name"></div>
+    </div>
+  </div>
+</div>
+

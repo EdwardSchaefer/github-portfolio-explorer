@@ -2,7 +2,15 @@
   display: inline-block;
   vertical-align: top;
   height: 100%;
-  width: 20%;
+  width: 15%;
+  overflow-y: auto;
+}
+
+.gpe-commit-graph {
+  display: inline-block;
+  vertical-align: top;
+  height: 100%;
+  width: 10%;
   overflow-y: auto;
 }
 
@@ -10,7 +18,7 @@
   display: inline-block;
   vertical-align: top;
   height: 100%;
-  width: 35%;
+  width: 30%;
   overflow-y: auto;
 }
 

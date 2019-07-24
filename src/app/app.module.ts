@@ -10,13 +10,15 @@ import { DirectoryViewerComponent } from './components/directory-viewer/director
 import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
 import {AuthInterceptor} from './auth.interceptor';
 import {FormsModule} from '@angular/forms';
+import {CommitGraphComponent} from './components/commit-graph/commit-graph.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     RepoListComponent,
     DirectoryViewerComponent,
-    FileViewerComponent
+    FileViewerComponent,
+    CommitGraphComponent
   ],
   imports: [
     BrowserModule,
