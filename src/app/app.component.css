@@ -14,6 +14,14 @@
   overflow-y: auto;
 }
 
+.gpe-differ {
+  display: inline-block;
+  vertical-align: top;
+  height: 100%;
+  width: 75%;
+  overflow-y: auto;
+}
+
 .gpe-directory-viewer {
   display: inline-block;
   vertical-align: top;

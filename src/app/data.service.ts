@@ -19,6 +19,7 @@ export class DataService {
   constructedTree: BehaviorSubject<any>;
   branches: BehaviorSubject<Branch[]>;
   commits: BehaviorSubject<Commit[]>;
+  diff: BehaviorSubject<any>;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     if (environment.username) {
@@ -30,6 +31,7 @@ export class DataService {
     this.branches = new BehaviorSubject<Branch[]>([]);
     this.commits = new BehaviorSubject<Commit[]>([]);
     this.readme = new BehaviorSubject<string>('');
+    this.diff = new BehaviorSubject(null);
   }
   getRepos() {
     if (this.username) {
@@ -76,6 +78,7 @@ export class DataService {
         return new Branch(branch.name, branch.commit.url, branch.commit.sha);
       });
       repo.branches.sort((a, b) => a.name === repo.defaultBranch ? -1 : 1);
+      console.log(repo.branches);
       this.branches.next(repo.branches);
       this.getAllCommits(repo);
     });
@@ -102,7 +105,15 @@ export class DataService {
           }
         });
       });
+      // arbitrary valid commit
+      this.compareCommits(repo, repo.branches[0].headSha, repo.branches[1].headSha);
       this.commits.next(commits);
+    });
+  }
+  compareCommits(repo, base, head) {
+    const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/compare/' + base + '...' + head;
+    this.http.get(url).subscribe(response => {
+      this.diff.next(response);
     });
   }
   getTree(commitTree) {
@@ -177,3 +188,4 @@ export class Commit {
 export class Tree {
   path: any;
 }
+
