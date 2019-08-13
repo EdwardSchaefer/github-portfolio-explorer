@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject} from 'rxjs';
 import {environment} from '../environments/environment';
+import * as hljs from 'highlight.js';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class DataService {
   selectedPath: string;
   repos: Repo[];
   selectedRepo: Repo;
-  file: any;
+  file: string;
   newLineCounter: any;
   readme: BehaviorSubject<string>;
   constructedTree: BehaviorSubject<any>;
@@ -78,7 +79,6 @@ export class DataService {
         return new Branch(branch.name, branch.commit.url, branch.commit.sha);
       });
       repo.branches.sort((a, b) => a.name === repo.defaultBranch ? -1 : 1);
-      console.log(repo.branches);
       this.branches.next(repo.branches);
       this.getAllCommits(repo);
     });
@@ -149,8 +149,10 @@ export class DataService {
     this.selectedPath = path;
     const url = this.baseURL + '/repos/' + this.username + '/' + this.repos[this.selectedIndex].name + '/contents/' + path + '?ref=' + branchName;
     this.http.get(url).subscribe(response => {
-      this.file = atob(response['content']);
-      this.newLineCounter = this.file.split(/\r\n|\r|\n/);
+      const atobFile = atob(response['content']);
+      const fileArray = hljs.highlightAuto(atobFile).value.split(/\r\n|\r|\n/);
+      this.file = '';
+      fileArray.forEach((file, i) => this.file = this.file + '<span class="gpe-file-lines">' + i + '</span>' + file + '\r');
     });
   }
   get data() {
