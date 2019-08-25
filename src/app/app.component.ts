@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import {Component, Inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DataService} from './data.service';
 import {environment} from '../environments/environment';
+import {DOCUMENT} from '@angular/common';
 
 @Component({
   selector: 'gpe-root',
@@ -11,9 +12,10 @@ import {environment} from '../environments/environment';
 export class AppComponent {
   public username: string;
   public token: string;
+  public style: string = 'default';
   public envUsername: boolean;
   public envAPIToken: boolean;
-  constructor(public data: DataService) {
+  constructor(@Inject(DOCUMENT) private document: Document, public data: DataService) {
     if (environment.username) {
       this.envUsername = true;
     } else {
@@ -36,6 +38,23 @@ export class AppComponent {
     if (e.keyCode === 13) {
       e.target.blur();
       localStorage.setItem('token', e.target.value);
+    }
+  }
+  setStyles(e) {
+    const styleName = e.target.value;
+    if (e.keyCode === 13) {
+      e.target.blur();
+      const head = this.document.getElementsByTagName('head')[0];
+      const themeLink = this.document.getElementById('client-theme') as HTMLLinkElement;
+      if (themeLink) {
+        themeLink.href = styleName + '.css';
+      } else {
+        const style = this.document.createElement('link');
+        style.id = 'client-theme';
+        style.rel = 'stylesheet';
+        style.href = styleName + '.css';
+        head.appendChild(style);
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-<div class="gpe-app-container">
+<div class="gpe-app-container hljs">
   <div *ngIf="!envUsername" class="username-field-container">
     github.com/
     <mat-form-field>
@@ -8,6 +8,11 @@
   <div *ngIf="!envAPIToken" class="token-field-container">
     <mat-form-field class="token-field">
       <input matInput placeholder="Personal Access Token" [value]="token" (keydown)="setToken($event)">
+    </mat-form-field>
+  </div>
+  <div *ngIf="true" class="style-field-container">
+    <mat-form-field class="style-field">
+      <input matInput placeholder="hljs style" [value]="style" (keydown)="setStyles($event)">
     </mat-form-field>
   </div>
   <gpe-repo-list class="gpe-repo-list" [repos]="data.repos"></gpe-repo-list>

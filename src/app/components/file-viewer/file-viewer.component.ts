@@ -6,10 +6,7 @@ import * as hljs from 'highlight.js';
 @Component({
   selector: 'gpe-file-viewer',
   templateUrl: './file-viewer.component.html',
-  styleUrls: [
-    './file-viewer.component.css',
-    '../../../../node_modules/highlight.js/styles/monokai-sublime.css'
-  ],
+  styleUrls: ['./file-viewer.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class FileViewerComponent {
@@ -24,3 +21,4 @@ export class FileViewerComponent {
     });
   }
 }
+

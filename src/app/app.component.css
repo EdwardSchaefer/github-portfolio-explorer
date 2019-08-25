@@ -51,6 +51,14 @@
   left: 16px;
   bottom: 0;
 }
+.style-field-container {
+  position: absolute;
+  left: 16px;
+  bottom: 130px;
+}
 .token-field {
   width: 200%;
+}
+.style-field {
+  width: 200px;
 }
