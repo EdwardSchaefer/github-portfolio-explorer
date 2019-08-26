@@ -10,13 +10,11 @@
 .gpe-file-button {
   height: 36px;
   width: 100%;
-  color: #000000;
   text-align: left;
 }
 .gpe-folder-button {
   height: 36px;
   width: 100%;
-  color: #000000;
   text-align: left;
   display: block;
   overflow: hidden;
@@ -31,4 +29,10 @@
   position: relative;
   display: inline-block;
   top: 10px;
+}
+.mat-tree {
+  background: none;
+}
+.mat-nested-tree-node, .mat-tree-node {
+  color: inherit;
 }

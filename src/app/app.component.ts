@@ -15,6 +15,7 @@ export class AppComponent {
   public style: string = 'default';
   public envUsername: boolean;
   public envAPIToken: boolean;
+  public envStyle: boolean;
   constructor(@Inject(DOCUMENT) private document: Document, public data: DataService) {
     if (environment.username) {
       this.envUsername = true;
@@ -25,6 +26,12 @@ export class AppComponent {
       this.envAPIToken = true;
     } else {
       this.token = localStorage.getItem('token');
+    }
+    if (environment.style) {
+      this.envStyle = true;
+    } else {
+      this.style = localStorage.getItem('style');
+      this.applyStyle(this.style);
     }
     this.data.getRepos();
   }
@@ -41,20 +48,25 @@ export class AppComponent {
     }
   }
   setStyles(e) {
-    const styleName = e.target.value;
     if (e.keyCode === 13) {
+      const styleName = e.target.value;
       e.target.blur();
-      const head = this.document.getElementsByTagName('head')[0];
-      const themeLink = this.document.getElementById('client-theme') as HTMLLinkElement;
-      if (themeLink) {
-        themeLink.href = styleName + '.css';
-      } else {
-        const style = this.document.createElement('link');
-        style.id = 'client-theme';
-        style.rel = 'stylesheet';
-        style.href = styleName + '.css';
-        head.appendChild(style);
-      }
+      localStorage.setItem('style', styleName);
+      this.applyStyle(styleName);
+    }
+  }
+  applyStyle(styleName) {
+    const stylePath = 'hljsStyles/' + styleName + '.css';
+    const head = this.document.getElementsByTagName('head')[0];
+    const themeLink = this.document.getElementById('client-theme') as HTMLLinkElement;
+    if (themeLink) {
+      themeLink.href = stylePath;
+    } else {
+      const style = this.document.createElement('link');
+      style.id = 'client-theme';
+      style.rel = 'stylesheet';
+      style.href = stylePath;
+      head.appendChild(style);
     }
   }
 }
