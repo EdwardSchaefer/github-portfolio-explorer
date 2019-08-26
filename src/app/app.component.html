@@ -10,9 +10,13 @@
       <input matInput placeholder="Personal Access Token" [value]="token" (keydown)="setToken($event)">
     </mat-form-field>
   </div>
-  <div *ngIf="true" class="style-field-container">
+  <div *ngIf="style" class="style-field-container">
     <mat-form-field class="style-field">
-      <input matInput placeholder="hljs style" [value]="style" (keydown)="setStyles($event)">
+      <mat-select (selectionChange)="setStyles($event)" [(value)]="style">
+        <mat-option *ngFor="let style of styles" [value]="style">
+          {{style}}
+        </mat-option>
+      </mat-select>
     </mat-form-field>
   </div>
   <gpe-repo-list class="gpe-repo-list" [repos]="data.repos"></gpe-repo-list>

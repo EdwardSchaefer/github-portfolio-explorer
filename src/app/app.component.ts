@@ -1,8 +1,8 @@
 import {Component, Inject} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 import {DataService} from './data.service';
 import {environment} from '../environments/environment';
 import {DOCUMENT} from '@angular/common';
+import * as hljsStyles from '../assets/hljs-styles.json';
 
 @Component({
   selector: 'gpe-root',
@@ -12,6 +12,8 @@ import {DOCUMENT} from '@angular/common';
 export class AppComponent {
   public username: string;
   public token: string;
+  public stylesRef: any = hljsStyles;
+  public styles: string[] = this.stylesRef.default.styleNames;
   public style: string = 'default';
   public envUsername: boolean;
   public envAPIToken: boolean;
@@ -48,12 +50,9 @@ export class AppComponent {
     }
   }
   setStyles(e) {
-    if (e.keyCode === 13) {
-      const styleName = e.target.value;
-      e.target.blur();
-      localStorage.setItem('style', styleName);
-      this.applyStyle(styleName);
-    }
+    const styleName = e.value;
+    localStorage.setItem('style', styleName);
+    this.applyStyle(styleName);
   }
   applyStyle(styleName) {
     const stylePath = 'hljsStyles/' + styleName + '.css';
