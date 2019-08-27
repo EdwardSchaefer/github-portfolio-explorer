@@ -15,11 +15,11 @@ export class RepoListComponent implements OnChanges {
   ngOnChanges() {
     this.filteredRepos = this.repos;
   }
-  selectRepo(repo, i) {
-    this.data.selectRepo(repo, i);
+  selectRepo(repo) {
+    this.data.selectRepo(repo);
   }
-  selected(index) {
-    if (index === this.data.selectedIndex) {
+  selected(repo) {
+    if (repo && this.data.selectedRepo && repo.name === this.data.selectedRepo.name) {
       return 'gpe-repo-list-item-selected';
     } else {
       return 'gpe-repo-list-item';

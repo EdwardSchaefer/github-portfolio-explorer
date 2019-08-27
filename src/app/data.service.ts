@@ -10,7 +10,6 @@ import * as hljs from 'highlight.js';
 export class DataService {
   baseURL: string;
   username: string;
-  selectedIndex: number;
   selectedPath: string;
   repos: Repo[];
   selectedRepo: Repo;
@@ -48,8 +47,7 @@ export class DataService {
       this.repos = [];
     }
   }
-  selectRepo(repo, i) {
-    this.selectedIndex = i;
+  selectRepo(repo) {
     this.getReadme(repo);
     this.getBranches(repo);
     this.selectedRepo = repo;
@@ -141,7 +139,7 @@ export class DataService {
   }
   getFile(path, branchName) {
     this.selectedPath = path;
-    const url = this.baseURL + '/repos/' + this.username + '/' + this.repos[this.selectedIndex].name + '/contents/' + path + '?ref=' + branchName;
+    const url = this.baseURL + '/repos/' + this.username + '/' + this.selectedRepo.name + '/contents/' + path + '?ref=' + branchName;
     this.http.get(url).subscribe(response => {
       const atobFile = atob(response['content']);
       const fileArray = hljs.highlightAuto(atobFile).value.split(/\r\n|\r|\n/);
