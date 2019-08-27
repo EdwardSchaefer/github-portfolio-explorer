@@ -15,7 +15,6 @@ export class DataService {
   repos: Repo[];
   selectedRepo: Repo;
   file: string;
-  newLineCounter: any;
   readme: BehaviorSubject<string>;
   constructedTree: BehaviorSubject<any>;
   branches: BehaviorSubject<Branch[]>;
@@ -23,11 +22,6 @@ export class DataService {
   diff: BehaviorSubject<any>;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
-    if (environment.username) {
-      this.username = environment.username;
-    } else {
-      this.username = localStorage.getItem('username');
-    }
     this.constructedTree = new BehaviorSubject<any>([]);
     this.branches = new BehaviorSubject<Branch[]>([]);
     this.commits = new BehaviorSubject<Commit[]>([]);

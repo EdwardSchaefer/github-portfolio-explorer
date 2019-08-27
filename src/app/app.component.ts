@@ -10,19 +10,19 @@ import * as hljsStyles from '../assets/hljs-styles.json';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  public username: string;
   public token: string;
   public stylesRef: any = hljsStyles;
   public styles: string[] = this.stylesRef.default.styleNames;
-  public style: string = 'default';
+  public style: string;
   public envUsername: boolean;
   public envAPIToken: boolean;
   public envStyle: boolean;
   constructor(@Inject(DOCUMENT) private document: Document, public data: DataService) {
     if (environment.username) {
       this.envUsername = true;
+      this.data.username = environment.username;
     } else {
-      this.username = localStorage.getItem('username');
+      this.data.username = localStorage.getItem('username');
     }
     if (environment.APItoken) {
       this.envAPIToken = true;
@@ -31,22 +31,29 @@ export class AppComponent {
     }
     if (environment.style) {
       this.envStyle = true;
+      this.style = environment.style;
     } else {
+      if (!localStorage.getItem('style')) {
+        localStorage.setItem('style', 'default');
+      }
       this.style = localStorage.getItem('style');
-      this.applyStyle(this.style);
     }
+    this.applyStyle(this.style);
     this.data.getRepos();
   }
   setUsername(e) {
     if (e.keyCode === 13) {
       e.target.blur();
       localStorage.setItem('username', e.target.value);
+      this.data.username = e.target.value;
+      this.data.getRepos();
     }
   }
   setToken(e) {
     if (e.keyCode === 13) {
       e.target.blur();
       localStorage.setItem('token', e.target.value);
+      this.data.getRepos();
     }
   }
   setStyles(e) {
