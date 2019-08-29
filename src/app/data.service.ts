@@ -97,8 +97,10 @@ export class DataService {
           }
         });
       });
-      // arbitrary valid commit
-      this.compareCommits(repo, repo.branches[0].headSha, repo.branches[1].headSha);
+      // most recent two commits
+      if (commits.length > 1) {
+        this.compareCommits(repo, commits[0].sha, commits[1].sha);
+      }
       this.commits.next(commits);
     });
   }
