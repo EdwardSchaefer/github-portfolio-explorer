@@ -1,7 +1,6 @@
 import {Component, ViewEncapsulation} from '@angular/core';
 import {DataService} from '../../data.service';
 import {DomSanitizer} from '@angular/platform-browser';
-import * as hljs from 'highlight.js';
 
 @Component({
   selector: 'gpe-file-viewer',

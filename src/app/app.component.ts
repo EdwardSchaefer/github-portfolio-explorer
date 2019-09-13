@@ -39,21 +39,21 @@ export class AppComponent {
       this.style = localStorage.getItem('style');
     }
     this.applyStyle(this.style);
-    this.data.getRepos();
+    this.data.getRepos('1');
   }
   setUsername(e) {
     if (e.keyCode === 13) {
       e.target.blur();
       localStorage.setItem('username', e.target.value);
       this.data.username = e.target.value;
-      this.data.getRepos();
+      this.data.getRepos('1');
     }
   }
   setToken(e) {
     if (e.keyCode === 13) {
       e.target.blur();
       localStorage.setItem('token', e.target.value);
-      this.data.getRepos();
+      this.data.getRepos('1');
     }
   }
   setStyles(e) {

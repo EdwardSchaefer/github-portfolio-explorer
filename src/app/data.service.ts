@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import {BehaviorSubject} from 'rxjs';
 import {environment} from '../environments/environment';
 import * as hljs from 'highlight.js';
@@ -17,6 +17,7 @@ export class DataService {
   readme: BehaviorSubject<string>;
   constructedTree: BehaviorSubject<any>;
   branches: BehaviorSubject<Branch[]>;
+  commitsStore: any[];
   commits: BehaviorSubject<Commit[]>;
   diff: BehaviorSubject<any>;
   constructor(public http: HttpClient) {
@@ -27,17 +28,28 @@ export class DataService {
     this.readme = new BehaviorSubject<string>('');
     this.diff = new BehaviorSubject(null);
   }
-  getRepos() {
+  getRepos(page) {
     if (this.username) {
       if (environment.repos.length) {
         this.repos = environment.repos.map(repo => {
           return new Repo(repo, repo['default_branch']);
         });
       } else {
-        this.http.get<Repo[]>(this.baseURL + '/users/' + this.username + '/repos').subscribe(response => {
-          this.repos = response.map(repo => {
-            return new Repo(repo.name, repo['default_branch']);
+        const url = this.baseURL + '/users/' + this.username + '/repos?page=' + page;
+        this.http.get<Repo[]>(url, {observe: 'response'}).subscribe(response => {
+          if (page === '1') {
+            this.repos = [];
+          }
+          const nextLink = response.headers.get('link');
+          response.body.forEach(repo => {
+            this.repos.push(new Repo(repo.name, repo['default_branch']));
           });
+          if (nextLink) {
+            const pageNumber = nextPage(nextLink);
+            if (pageNumber) {
+              this.getRepos(pageNumber);
+            }
+          }
         }, error => {
           this.username = '';
           this.repos = [];
@@ -72,7 +84,7 @@ export class DataService {
       });
       repo.branches.sort((a, b) => a.name === repo.defaultBranch ? -1 : 1);
       this.branches.next(repo.branches);
-      this.getAllCommits(repo);
+      this.getAllCommits(repo, '1');
     });
   }
   getCommits(url) {
@@ -81,27 +93,42 @@ export class DataService {
       this.getTree(response.commit.tree);
     });
   }
-  getAllCommits(repo) {
-    this.http.get((this.baseURL + '/repos/' + this.username + '/' + repo.name + '/commits')).subscribe((commits: any[]) => {
-      repo.branches.map(branch => {
-        const foundCommit = commits.find(commit => commit['sha'] === branch['headSha']);
-        if (foundCommit) {
-          foundCommit.branch = branch.name;
-        }
+  getAllCommits(repo, page) {
+    const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/commits?page=' + page;
+    this.http.get<any[]>(url, {observe: 'response'}).subscribe(response => {
+      if (page === '1') {
+        this.commitsStore = [];
+      }
+      const nextLink = response.headers.get('link');
+      response.body.forEach(commit => {
+        this.commitsStore.push(commit);
       });
-      commits.map((commit, i) => {
-        commit['parents'].map(parent => {
-          const foundParent = commits.find(a => a['sha'] === parent['sha']);
-          if (foundParent && !foundParent['branch']) {
-            foundParent['branch'] = commit.branch;
+      if (nextLink) {
+        const pageNumber = nextPage(nextLink);
+        if (pageNumber) {
+          this.getAllCommits(repo, pageNumber);
+        }
+      } else {
+        repo.branches.map(branch => {
+          const foundCommit = this.commitsStore.find(commit => commit['sha'] === branch['headSha']);
+          if (foundCommit) {
+            foundCommit.branch = branch.name;
           }
         });
-      });
-      // most recent two commits
-      if (commits.length > 1) {
-        this.compareCommits(repo, commits[0].sha, commits[1].sha);
+        this.commitsStore.forEach((commit, i) => {
+          commit['parents'].map(parent => {
+            const foundParent = this.commitsStore.find(a => a['sha'] === parent['sha']);
+            if (foundParent && !foundParent['branch']) {
+              foundParent['branch'] = commit.branch;
+            }
+          });
+        });
+        // most recent two commits
+        if (this.commitsStore.length > 1) {
+          this.compareCommits(repo, this.commitsStore[0].sha, this.commitsStore[1].sha);
+        }
+        this.commits.next(this.commitsStore);
       }
-      this.commits.next(commits);
     });
   }
   compareCommits(repo, base, head) {
@@ -153,6 +180,13 @@ export class DataService {
     return this.constructedTree.value;
   }
 }
+
+const nextPage = (linkHeader: string) => {
+  const nextLink = linkHeader.split(',').find(url => url.includes('next'));
+  if (nextLink) {
+    return nextLink.split('page=')[1][0];
+  }
+};
 
 export class Repo {
   name: string;
