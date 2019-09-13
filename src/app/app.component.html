@@ -19,6 +19,9 @@
       </mat-select>
     </mat-form-field>
   </div>
+  <div class="rate-limit-container">
+    <span>{{data.rateLimit}} / {{data.rateRemaining}} requests remaining until {{data.rateReset | date: 'medium'}}</span>
+  </div>
   <gpe-repo-list class="gpe-repo-list" [repos]="data.repos"></gpe-repo-list>
   <gpe-commit-graph class="gpe-commit-graph" [branches]="data.branches | async" [commits]="data.commits | async"></gpe-commit-graph>
   <!--<gpe-differ class="gpe-differ" *ngIf="data.diff" [comparison]="data.diff | async"></gpe-differ>-->

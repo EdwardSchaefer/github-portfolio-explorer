@@ -20,6 +20,9 @@ export class DataService {
   commitsStore: any[];
   commits: BehaviorSubject<Commit[]>;
   diff: BehaviorSubject<any>;
+  rateLimit: number;
+  rateRemaining: number;
+  rateReset: number;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     this.constructedTree = new BehaviorSubject<any>([]);
@@ -37,6 +40,7 @@ export class DataService {
       } else {
         const url = this.baseURL + '/users/' + this.username + '/repos?page=' + page;
         this.http.get<Repo[]>(url, {observe: 'response'}).subscribe(response => {
+          this.updateLimits(response.headers);
           if (page === '1') {
             this.repos = [];
           }
@@ -70,15 +74,19 @@ export class DataService {
       this.readme.next(repo.readme);
     } else {
       const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
-      this.http.get(url, {responseType: 'text'}).subscribe(response => {
+      this.http.get(url, {responseType: 'text', observe: 'response'}).subscribe(response => {
+        this.updateLimits(response.headers);
         this.file = null;
-        this.readme.next(response);
+        this.readme.next(response.body);
         repo.readme = response;
       });
     }
   }
   getBranches(repo: Repo) {
-    this.http.get((this.baseURL + '/repos/' + this.username + '/' + repo.name + '/branches')).subscribe((branches: any[]) => {
+    const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/branches';
+    this.http.get<any[]>(url, {observe: 'response'}).subscribe(response => {
+      this.updateLimits(response.headers);
+      const branches: any[] = response.body;
       repo.branches = branches.map(branch => {
         return new Branch(branch.name, branch.commit.url, branch.commit.sha);
       });
@@ -88,14 +96,16 @@ export class DataService {
     });
   }
   getCommits(url) {
-    this.http.get(url).subscribe((response: any) => {
+    this.http.get(url, {observe: 'response'}).subscribe((response: any) => {
+      this.updateLimits(response.headers);
       // most recent commit
-      this.getTree(response.commit.tree);
+      this.getTree(response.body.commit.tree);
     });
   }
   getAllCommits(repo, page) {
     const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/commits?page=' + page;
     this.http.get<any[]>(url, {observe: 'response'}).subscribe(response => {
+      this.updateLimits(response.headers);
       if (page === '1') {
         this.commitsStore = [];
       }
@@ -133,15 +143,17 @@ export class DataService {
   }
   compareCommits(repo, base, head) {
     const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/compare/' + base + '...' + head;
-    this.http.get(url).subscribe(response => {
-      this.diff.next(response);
+    this.http.get(url, {observe: 'response'}).subscribe(response => {
+      this.updateLimits(response.headers);
+      this.diff.next(response.body);
     });
   }
   getTree(commitTree) {
     const recursiveURL = commitTree.url + '?recursive=1';
-    this.http.get(recursiveURL).subscribe(response => {
+    this.http.get(recursiveURL, {observe: 'response'}).subscribe(response => {
+      this.updateLimits(response.headers);
       const tree = [];
-      response['tree'].map(a => {
+      response.body['tree'].map(a => {
         if (a.type === 'tree') {
           a['children'] = [];
         }
@@ -169,8 +181,9 @@ export class DataService {
   getFile(path, branchName) {
     this.selectedPath = path;
     const url = this.baseURL + '/repos/' + this.username + '/' + this.selectedRepo.name + '/contents/' + path + '?ref=' + branchName;
-    this.http.get(url).subscribe(response => {
-      const atobFile = atob(response['content']);
+    this.http.get(url, {observe: 'response'}).subscribe(response => {
+      this.updateLimits(response.headers);
+      const atobFile = atob(response.body['content']);
       const fileArray = hljs.highlightAuto(atobFile).value.split(/\r\n|\r|\n/);
       this.file = '';
       fileArray.forEach((file, i) => this.file = this.file + '<span class="gpe-file-lines">' + i + '</span>' + file + '\r');
@@ -178,6 +191,12 @@ export class DataService {
   }
   get data() {
     return this.constructedTree.value;
+  }
+  updateLimits = (headers) => {
+    this.rateLimit = headers.get('X-RateLimit-Limit');
+    this.rateRemaining = headers.get('X-RateLimit-Remaining');
+    this.rateReset = 1000 * (headers.get('X-RateLimit-Reset'));
+    // limitHeader: string, remainingHeader: string, resetHeader: string
   }
 }
 

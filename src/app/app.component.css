@@ -56,6 +56,11 @@
   left: 16px;
   bottom: 130px;
 }
+.rate-limit-container {
+  position: absolute;
+  left: 16px;
+  bottom: 0;
+}
 .token-field {
   width: 200%;
 }
