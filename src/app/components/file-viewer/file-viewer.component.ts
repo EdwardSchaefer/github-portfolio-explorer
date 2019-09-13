@@ -1,11 +1,12 @@
-import {Component, OnChanges, OnInit} from '@angular/core';
+import {Component, ViewEncapsulation} from '@angular/core';
 import {DataService} from '../../data.service';
 import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
   selector: 'gpe-file-viewer',
   templateUrl: './file-viewer.component.html',
-  styleUrls: ['./file-viewer.component.css']
+  styleUrls: ['./file-viewer.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class FileViewerComponent {
   public htmlData: any;
@@ -19,3 +20,4 @@ export class FileViewerComponent {
     });
   }
 }
+

@@ -1,21 +1,23 @@
 .gpe-file-container {
   padding: 5px;
-  background-color: #aaaadd;
-  display: flex;
-  justify-content: space-between;
 }
 .gpe-file-contents {
   display: inline-block;
-  font-family: monospace;
-  white-space: pre;
-  width: 100%;
+  width: calc(100% - 30px);
+  margin: -20px 0 0 0;
+  padding: 0;
 }
 .gpe-file-lines {
   color: #888888;
   display: inline-block;
   font-family: monospace;
   vertical-align: top;
-  margin: 0 10px 0 0;
+  width: 30px;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 .gpe-file-line-count {
   display: block;

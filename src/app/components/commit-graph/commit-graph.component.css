@@ -1,0 +1,17 @@
+.commit-space {
+  width: 20px;
+  height: 20px;
+}
+
+.commit-node {
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #000000;
+}
+
+.branch-column {
+  height: 100%;
+  width: 20px;
+  display: inline-block;
+}

@@ -1,16 +1,32 @@
-<div class="gpe-app-container">
-  <div *ngIf="!envUsername" class="username-field-container">
-    github.com/
-    <mat-form-field>
-      <input matInput placeholder="Username" [value]="username" (keydown)="setUsername($event)">
-    </mat-form-field>
-  </div>
-  <div *ngIf="!envAPIToken" class="token-field-container">
-    <mat-form-field class="token-field">
-      <input matInput placeholder="Personal Access Token" [value]="token" (keydown)="setToken($event)">
-    </mat-form-field>
+<div class="gpe-app-container hljs">
+  <div *ngIf="!envProduction" class='demo-controls'>
+    <div *ngIf="!envUsername" class="username-field-container">
+      github.com/
+      <mat-form-field>
+        <input matInput placeholder="Username" [value]="data.username" (keydown)="setUsername($event)">
+      </mat-form-field>
+    </div>
+    <div *ngIf="!envAPIToken" class="token-field-container">
+      <mat-form-field class="token-field">
+        <input matInput placeholder="Personal Access Token" [value]="token" (keydown)="setToken($event)">
+      </mat-form-field>
+    </div>
+    <div *ngIf="!envStyle" class="style-field-container">
+      <mat-form-field class="style-field">
+        <mat-select (selectionChange)="setStyles($event)" [(value)]="style">
+          <mat-option *ngFor="let style of styles" [value]="style">
+            {{style}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="rate-limit-container">
+      <span>{{data.rateLimit}} / {{data.rateRemaining}} requests remaining until {{data.rateReset | date: 'medium'}}</span>
+    </div>
   </div>
   <gpe-repo-list class="gpe-repo-list" [repos]="data.repos"></gpe-repo-list>
+  <gpe-commit-graph class="gpe-commit-graph" [branches]="data.branches | async" [commits]="data.commits | async"></gpe-commit-graph>
+  <!--<gpe-differ class="gpe-differ" *ngIf="data.diff" [comparison]="data.diff | async"></gpe-differ>-->
   <gpe-directory-viewer class="gpe-directory-viewer"></gpe-directory-viewer>
   <gpe-file-viewer class="gpe-file-viewer"></gpe-file-viewer>
 </div>

@@ -2,13 +2,13 @@
   <mat-form-field class="gpe-search-field">
     <input matInput (keyup)="filterRepos($event)" placeholder="Search">
   </mat-form-field>
-  <div>
+  <div class="gpe-repo-list-container">
     <button
       [@repoList]
-      [ngClass]="selected(i)"
+      [ngClass]="selected(repo)"
       mat-button
       *ngFor="let repo of filteredRepos; let i = index"
-      (click)="selectRepo(repo, i)">
+      (click)="selectRepo(repo)">
       {{repo.name}}
     </button>
   </div>

@@ -2,7 +2,23 @@
   display: inline-block;
   vertical-align: top;
   height: 100%;
-  width: 20%;
+  width: 15%;
+  overflow-y: auto;
+}
+
+.gpe-commit-graph {
+  display: inline-block;
+  vertical-align: top;
+  height: 100%;
+  width: 10%;
+  overflow-y: auto;
+}
+
+.gpe-differ {
+  display: inline-block;
+  vertical-align: top;
+  height: 100%;
+  width: 75%;
   overflow-y: auto;
 }
 
@@ -10,7 +26,7 @@
   display: inline-block;
   vertical-align: top;
   height: 100%;
-  width: 35%;
+  width: 30%;
   overflow-y: auto;
 }
 
@@ -35,6 +51,28 @@
   left: 16px;
   bottom: 0;
 }
+.style-field-container {
+  position: absolute;
+  left: 16px;
+  bottom: 130px;
+}
+.rate-limit-container {
+  position: absolute;
+  left: 16px;
+  bottom: 0;
+}
 .token-field {
   width: 200%;
+}
+.style-field {
+  width: 200px;
+}
+.demo-controls {
+  height: 200px;
+  width: 500px;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  position: absolute;
+  bottom: 0;
+  border-radius: 20px;
 }

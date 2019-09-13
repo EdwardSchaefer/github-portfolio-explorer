@@ -1,12 +1,8 @@
 <div class="gpe-file-container" *ngIf="data.file">
-  <div class="gpe-file-lines">
-    <div *ngFor="let count of data.newLineCounter; let i = index" class="gpe-file-line-count">
-      {{i + 1}}
-    </div>
-  </div>
-  <div class="gpe-file-contents">{{data.file}}</div>
+  <pre class="gpe-file-contents">
+    <code class="hljs" [innerHTML]="data.file"></code>
+  </pre>
 </div>
 <div *ngIf="!data.file">
   <div *ngIf="data.selectedRepo" [innerHTML]="htmlData"></div>
 </div>
-

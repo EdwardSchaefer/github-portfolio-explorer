@@ -6,6 +6,7 @@ export const environment = {
   production: false,
   username: null,
   APItoken: null,
+  style: null,
   repos: []
 };
 
