@@ -17,7 +17,11 @@ export class AppComponent {
   public envUsername: boolean;
   public envAPIToken: boolean;
   public envStyle: boolean;
+  public envProduction: boolean;
   constructor(@Inject(DOCUMENT) private document: Document, public data: DataService) {
+    if (environment.production) {
+      this.envProduction = true;
+    }
     if (environment.username) {
       this.envUsername = true;
       this.data.username = environment.username;

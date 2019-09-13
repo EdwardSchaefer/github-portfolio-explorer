@@ -2,7 +2,7 @@
   <mat-form-field class="gpe-search-field">
     <input matInput (keyup)="filterRepos($event)" placeholder="Search">
   </mat-form-field>
-  <div>
+  <div class="gpe-repo-list-container">
     <button
       [@repoList]
       [ngClass]="selected(repo)"

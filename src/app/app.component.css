@@ -67,3 +67,12 @@
 .style-field {
   width: 200px;
 }
+.demo-controls {
+  height: 200px;
+  width: 500px;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  position: absolute;
+  bottom: 0;
+  border-radius: 20px;
+}
