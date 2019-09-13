@@ -9,14 +9,15 @@ import {environment} from '../environments/environment';
 export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let token: string;
+    let headers = new HttpHeaders();
     if (environment.APItoken) {
       token = environment.APItoken;
     } else {
       token = localStorage.getItem('token');
     }
-    let headers = new HttpHeaders({
-      'Authorization': 'token ' + token
-    });
+    if (token.length) {
+      headers = headers.append('Authorization', 'token ' + token);
+    }
     if (req['url'].slice(req['url'].length - 7, req['url'].length) === '/readme') {
       headers = headers.append('Accept', 'application/vnd.github.v3.html');
     }
