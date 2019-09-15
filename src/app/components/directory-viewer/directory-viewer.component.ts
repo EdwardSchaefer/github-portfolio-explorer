@@ -22,7 +22,7 @@ interface TreeNode {
   animations: [DirectoryViewerAnimations]
 })
 export class DirectoryViewerComponent implements AfterViewInit {
-  @ViewChild('branchSelect') branchSelect;
+  @ViewChild('branchSelect', { static: true }) branchSelect;
   private transformer = (node: TreeNode, level: number) => {
     return {
       expandable: !!node.children && node.children.length > 0,

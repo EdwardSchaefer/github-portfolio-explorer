@@ -10,7 +10,7 @@ import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass
   styleUrls: ['./differ.component.css']
 })
 export class DifferComponent implements OnChanges, AfterViewInit {
-  @ViewChild('rendererContainer') rendererContainer: ElementRef;
+  @ViewChild('rendererContainer', { static: true }) rendererContainer: ElementRef;
   @Input('comparison') comparison;
   files: File[] = [];
   composer: EffectComposer;
