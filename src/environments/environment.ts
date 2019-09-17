@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  demoMode: true,
   username: null,
   APItoken: null,
   style: null,

@@ -18,9 +18,13 @@ export class AppComponent {
   public envAPIToken: boolean;
   public envStyle: boolean;
   public envProduction: boolean;
+  public envDemoMode: boolean;
   constructor(@Inject(DOCUMENT) private document: Document, public data: DataService) {
     if (environment.production) {
       this.envProduction = true;
+    }
+    if (environment.demoMode) {
+      this.envDemoMode = true;
     }
     if (environment.username) {
       this.envUsername = true;
