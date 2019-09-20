@@ -135,14 +135,14 @@ export class DataService {
         });
         // most recent two commits
         if (this.commitsStore.length > 1) {
-          this.compareCommits(repo, this.commitsStore[0].sha, this.commitsStore[1].sha);
+          this.diffCommit(repo, this.commitsStore[0].sha);
         }
         this.commits.next(this.commitsStore);
       }
     });
   }
-  compareCommits(repo, base, head) {
-    const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/compare/' + base + '...' + head;
+  diffCommit(repo, sha) {
+    const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/commits/' + sha;
     this.http.get(url, {observe: 'response'}).subscribe(response => {
       this.updateLimits(response.headers);
       this.diff.next(response.body);

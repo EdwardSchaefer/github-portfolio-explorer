@@ -16,6 +16,7 @@ export class CommitGraphComponent implements OnChanges {
   }
 
   selectCommit(commit) {
-    this.data.getTree(commit.commit.tree);
+    // this.data.getTree(commit.commit.tree);
+    this.data.diffCommit(this.data.selectedRepo, commit.sha);
   }
 }
