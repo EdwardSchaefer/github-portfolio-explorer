@@ -134,9 +134,9 @@ export class DataService {
           });
         });
         // most recent two commits
-        if (this.commitsStore.length > 1) {
-          this.diffCommit(repo, this.commitsStore[0].sha);
-        }
+        // if (this.commitsStore.length > 1) {
+        //   this.diffCommit(repo, this.commitsStore[0].sha);
+        // }
         this.commits.next(this.commitsStore);
       }
     });

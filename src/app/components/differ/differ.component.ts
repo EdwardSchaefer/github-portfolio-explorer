@@ -12,54 +12,49 @@ import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass
 export class DifferComponent implements OnChanges, AfterViewInit {
   @ViewChild('rendererContainer', { static: true }) rendererContainer: ElementRef;
   @Input('comparison') comparison;
+  codeScreens: CodeScreen[];
   files: File[] = [];
   composer: EffectComposer;
   renderer: THREE.WebGLRenderer;
+  font;
   loader;
-  text;
   camera;
   scene;
   light;
-  constructor() { }
-
+  constructor() {
+    this.codeScreens = [];
+  }
   ngOnChanges() {
-    if (this.comparison) {
+    if (!this.font) {
+      this.loadFont();
+    }
+    if (this.font && this.comparison) {
       this.comparison.files.map(file => {
+        if (this.files.length) {this.files = []}
         this.files.push(new File(file));
       });
-      this.loadText(this.files[0].slab);
+      if (this.codeScreens.length) {
+        this.codeScreens.forEach(codeScreen => codeScreen.dispose());
+        this.codeScreens = [];
+        while (this.scene.children.length > 0) {
+          this.scene.remove(this.scene.children[0]);
+        }
+      }
+      this.codeScreens.push(new CodeScreen(this.files[0].slab, this.font));
+      this.scene.add(this.codeScreens[0].textMesh);
     }
   }
-
   ngAfterViewInit() {
 
   }
-
-  loadText(message) {
-    const that = this;
+  loadFont() {
     this.loader = new THREE.FontLoader();
-    this.loader.load('assets/fonts/courier_prime_sans_regular.typeface.json', function (font) {
-      const color = 0x44ff88;
-      const matLite = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: false,
-        opacity: 0.5,
-        side: THREE.DoubleSide
-      });
-      const shapes = font.generateShapes(message, 10, 1);
-      const geometry = new THREE.ShapeBufferGeometry(shapes);
-      geometry.computeBoundingBox();
-      // offset left column
-      const xMid = geometry.boundingBox.min.x - geometry.boundingBox.max.x;
-      const yMid = (geometry.boundingBox.max.y - geometry.boundingBox.min.y) / 2;
-      geometry.translate(xMid, yMid, 0);
-      that.initComposer(new THREE.Mesh(geometry, matLite));
+    this.loader.load('assets/fonts/courier_prime_sans_regular.typeface.json', font => {
+      this.font = font;
     });
+    this.initComposer();
   }
-
-  initComposer(textMesh) {
-    this.text = textMesh;
-    this.text.position.z = -150;
+  initComposer() {
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -67,7 +62,6 @@ export class DifferComponent implements OnChanges, AfterViewInit {
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2500);
     this.camera.position.z = 900;
     this.scene = new THREE.Scene();
-    this.scene.add(this.text);
     this.scene.add(new THREE.AmbientLight( 0x404040));
     this.scene.add(new THREE.AmbientLight( 0x222222));
     this.light = new THREE.DirectionalLight( 0xffffff);
@@ -82,10 +76,9 @@ export class DifferComponent implements OnChanges, AfterViewInit {
     this.composer.addPass(bloomPass);
     this.animate();
   }
-
   animate = () => {
     requestAnimationFrame(this.animate);
-    this.text.rotation.y += 0.001;
+    this.codeScreens.forEach(codeScreen => codeScreen.textMesh.rotation.y += 0.001);
     this.composer.render();
   }
 }
@@ -103,3 +96,30 @@ export class File {
   }
 }
 
+export class CodeScreen {
+  material;
+  geometry;
+  color = 0x44ff88;
+  textMesh;
+  constructor(message, font) {
+    this.material = new THREE.MeshBasicMaterial({
+      color: this.color,
+      transparent: false,
+      opacity: 0.5,
+      side: THREE.DoubleSide
+    });
+    const shapes = font.generateShapes(message, 10, 1);
+    this.geometry = new THREE.ShapeBufferGeometry(shapes);
+    this.geometry.computeBoundingBox();
+    // offset left column
+    const xMid = this.geometry.boundingBox.min.x - this.geometry.boundingBox.max.x;
+    const yMid = (this.geometry.boundingBox.max.y - this.geometry.boundingBox.min.y) / 2;
+    this.geometry.translate(xMid, yMid, 0);
+    this.textMesh = new THREE.Mesh(this.geometry, this.material);
+    this.textMesh.position.z = -150;
+  }
+  dispose() {
+    if (this.material) {this.material.dispose()}
+    if (this.geometry) {this.geometry.dispose()}
+  }
+}
