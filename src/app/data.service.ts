@@ -24,6 +24,7 @@ export class DataService {
   rateRemaining: number;
   rateReset: number;
   hljsSheetRef: CSSStyleSheet;
+  hljsColors: ThreeJSColors;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     this.constructedTree = new BehaviorSubject<any>([]);
@@ -199,6 +200,9 @@ export class DataService {
   loadhljsSheet() {
     const sheets: any[] = Object.values(document.styleSheets);
     this.hljsSheetRef = sheets.find(sheet => sheet.href && sheet.href.includes('hljs'));
+    if (this.hljsSheetRef) {
+      this.hljsColors = new ThreeJSColors(this.hljsSheetRef);
+    }
   }
   updateLimits = (headers) => {
     this.rateLimit = headers.get('X-RateLimit-Limit');
@@ -246,3 +250,11 @@ export class Tree {
   path: any;
 }
 
+export class ThreeJSColors {
+  background: string;
+  constructor(hljsSheet) {
+    const rules: any[] = Object.values(hljsSheet.rules);
+    const hljsRule = rules.find(rule => rule.selectorText === '.hljs');
+    this.background = hljsRule.style.background;
+  }
+}

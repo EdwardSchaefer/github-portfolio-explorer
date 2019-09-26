@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import {DataService} from '../../data.service';
 
 @Component({
   selector: 'gpe-differ',
@@ -20,15 +21,22 @@ export class DifferComponent implements OnChanges, AfterViewInit {
   loader;
   camera;
   scene;
-  light;
-  constructor() {
+  initialized: boolean;
+  constructor(public data: DataService) {
     this.codeScreens = [];
   }
   ngOnChanges() {
     if (!this.font) {
       this.loadFont();
     }
-    if (this.font && this.comparison) {
+    if (!this.data.hljsSheetRef) {
+      this.data.loadhljsSheet();
+    }
+    if (!this.initialized && this.font && this.data.hljsSheetRef) {
+      this.initComposer();
+      this.initialized = true;
+    }
+    if (this.initialized && this.comparison) {
       this.comparison.files.map(file => {
         if (this.files.length) {this.files = []}
         this.files.push(new File(file));
@@ -52,7 +60,6 @@ export class DifferComponent implements OnChanges, AfterViewInit {
     this.loader.load('assets/fonts/courier_prime_sans_regular.typeface.json', font => {
       this.font = font;
     });
-    this.initComposer();
   }
   initComposer() {
     this.renderer = new THREE.WebGLRenderer();
@@ -62,18 +69,14 @@ export class DifferComponent implements OnChanges, AfterViewInit {
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2500);
     this.camera.position.z = 900;
     this.scene = new THREE.Scene();
-    this.scene.add(new THREE.AmbientLight( 0x404040));
-    this.scene.add(new THREE.AmbientLight( 0x222222));
-    this.light = new THREE.DirectionalLight( 0xffffff);
-    this.light.position.set(1, 1, 1);
-    this.scene.add(this.light);
+    this.scene.background = new THREE.Color(this.data.hljsColors.background);
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass( new RenderPass(this.scene, this.camera));
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0, 0, 0);
-    bloomPass.threshold = 0;
-    bloomPass.strength = 1.5;
-    bloomPass.radius = 0.1;
-    this.composer.addPass(bloomPass);
+    // const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0, 0, 0);
+    // bloomPass.threshold = 0;
+    // bloomPass.strength = 1.5;
+    // bloomPass.radius = 0.1;
+    // this.composer.addPass(bloomPass);
     this.animate();
   }
   animate = () => {
