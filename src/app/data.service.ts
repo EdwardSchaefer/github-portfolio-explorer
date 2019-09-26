@@ -23,6 +23,7 @@ export class DataService {
   rateLimit: number;
   rateRemaining: number;
   rateReset: number;
+  hljsSheetRef: CSSStyleSheet;
   constructor(public http: HttpClient) {
     this.baseURL = 'https://api.github.com';
     this.constructedTree = new BehaviorSubject<any>([]);
@@ -142,6 +143,9 @@ export class DataService {
     });
   }
   diffCommit(repo, sha) {
+    if (!this.hljsSheetRef) {
+      this.loadhljsSheet();
+    }
     const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/commits/' + sha;
     this.http.get(url, {observe: 'response'}).subscribe(response => {
       this.updateLimits(response.headers);
@@ -191,6 +195,10 @@ export class DataService {
   }
   get data() {
     return this.constructedTree.value;
+  }
+  loadhljsSheet() {
+    const sheets: any[] = Object.values(document.styleSheets);
+    this.hljsSheetRef = sheets.find(sheet => sheet.href && sheet.href.includes('hljs'));
   }
   updateLimits = (headers) => {
     this.rateLimit = headers.get('X-RateLimit-Limit');
