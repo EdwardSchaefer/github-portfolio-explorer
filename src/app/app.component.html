@@ -26,7 +26,7 @@
   </div>
   <gpe-repo-list class="gpe-repo-list" [repos]="data.repos"></gpe-repo-list>
   <gpe-commit-graph class="gpe-commit-graph" [branches]="data.branches | async" [commits]="data.commits | async"></gpe-commit-graph>
-  <gpe-differ class="gpe-differ" *ngIf="data.diff" [comparison]="data.diff | async"></gpe-differ>
+  <!--<gpe-differ class="gpe-differ" *ngIf="data.diff" [comparison]="data.diff | async"></gpe-differ>-->
   <gpe-directory-viewer class="gpe-directory-viewer"></gpe-directory-viewer>
   <gpe-file-viewer class="gpe-file-viewer"></gpe-file-viewer>
 </div>

@@ -12,6 +12,8 @@ import {AuthInterceptor} from './auth.interceptor';
 import {FormsModule} from '@angular/forms';
 import {CommitGraphComponent} from './components/commit-graph/commit-graph.component';
 import { DifferComponent } from './components/differ/differ.component';
+import {DataService} from './data.service';
+import {ColorService} from './color.service';
 
 @NgModule({
   declarations: [
@@ -35,6 +37,8 @@ import { DifferComponent } from './components/differ/differ.component';
     MatSelectModule
   ],
   providers: [
+    DataService,
+    ColorService,
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}
   ],
   bootstrap: [AppComponent]

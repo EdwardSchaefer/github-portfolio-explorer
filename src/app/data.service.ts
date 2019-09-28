@@ -2,11 +2,9 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
 import {BehaviorSubject} from 'rxjs';
 import {environment} from '../environments/environment';
-import * as hljs from 'highlight.js';
+import {ColorService} from './color.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class DataService {
   baseURL: string;
   username: string;
@@ -23,9 +21,7 @@ export class DataService {
   rateLimit: number;
   rateRemaining: number;
   rateReset: number;
-  hljsSheetRef: CSSStyleSheet;
-  hljsColors: ThreeJSColors;
-  constructor(public http: HttpClient) {
+  constructor(public http: HttpClient, public color: ColorService) {
     this.baseURL = 'https://api.github.com';
     this.constructedTree = new BehaviorSubject<any>([]);
     this.branches = new BehaviorSubject<Branch[]>([]);
@@ -144,9 +140,6 @@ export class DataService {
     });
   }
   diffCommit(repo, sha) {
-    if (!this.hljsSheetRef) {
-      this.loadhljsSheet();
-    }
     const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/commits/' + sha;
     this.http.get(url, {observe: 'response'}).subscribe(response => {
       this.updateLimits(response.headers);
@@ -189,20 +182,11 @@ export class DataService {
     this.http.get(url, {observe: 'response'}).subscribe(response => {
       this.updateLimits(response.headers);
       const atobFile = atob(response.body['content']);
-      const fileArray = hljs.highlightAuto(atobFile).value.split(/\r\n|\r|\n/);
-      this.file = '';
-      fileArray.forEach((file, i) => this.file = this.file + '<span class="gpe-file-lines">' + i + '</span>' + file + '\r');
+      this.file = this.color.colorize(atobFile);
     });
   }
   get data() {
     return this.constructedTree.value;
-  }
-  loadhljsSheet() {
-    const sheets: any[] = Object.values(document.styleSheets);
-    this.hljsSheetRef = sheets.find(sheet => sheet.href && sheet.href.includes('hljs'));
-    if (this.hljsSheetRef) {
-      this.hljsColors = new ThreeJSColors(this.hljsSheetRef);
-    }
   }
   updateLimits = (headers) => {
     this.rateLimit = headers.get('X-RateLimit-Limit');
@@ -248,13 +232,4 @@ export class Commit {
 
 export class Tree {
   path: any;
-}
-
-export class ThreeJSColors {
-  background: string;
-  constructor(hljsSheet) {
-    const rules: any[] = Object.values(hljsSheet.rules);
-    const hljsRule = rules.find(rule => rule.selectorText === '.hljs');
-    this.background = hljsRule.style.background;
-  }
 }

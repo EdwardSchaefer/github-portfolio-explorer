@@ -4,6 +4,7 @@ import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import {DataService} from '../../data.service';
+import {ColorService} from '../../color.service';
 
 @Component({
   selector: 'gpe-differ',
@@ -22,17 +23,17 @@ export class DifferComponent implements OnChanges, AfterViewInit {
   camera;
   scene;
   initialized: boolean;
-  constructor(public data: DataService) {
+  constructor(public data: DataService, public color: ColorService) {
     this.codeScreens = [];
   }
   ngOnChanges() {
     if (!this.font) {
       this.loadFont();
     }
-    if (!this.data.hljsSheetRef) {
-      this.data.loadhljsSheet();
+    if (!this.color.hljsSheetRef) {
+      this.color.loadhljsSheet();
     }
-    if (!this.initialized && this.font && this.data.hljsSheetRef) {
+    if (!this.initialized && this.font && this.color.hljsSheetRef) {
       this.initComposer();
       this.initialized = true;
     }
@@ -69,7 +70,7 @@ export class DifferComponent implements OnChanges, AfterViewInit {
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2500);
     this.camera.position.z = 900;
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(this.data.hljsColors.background);
+    this.scene.background = new THREE.Color(this.color.hljsColors.background);
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass( new RenderPass(this.scene, this.camera));
     // const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0, 0, 0);
