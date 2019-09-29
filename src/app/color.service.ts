@@ -1,12 +1,21 @@
 import { Injectable } from '@angular/core';
 import * as hljs from 'highlight.js';
+import * as THREE from 'three';
 
 @Injectable()
 export class ColorService {
+  loader;
+  font;
   hljsSheetRef: CSSStyleSheet;
   hljsColors: ThreeJSColors;
   constructor() {
     this.loadhljsSheet();
+  }
+  colorize(atobFile): string {
+    const fileArray = hljs.highlightAuto(atobFile).value.split(/\r\n|\r|\n/);
+    let file = '';
+    fileArray.forEach((fileLine, i) => file = file + '<span class="gpe-file-lines">' + i + '</span>' + fileLine + '\r');
+    return file;
   }
   loadhljsSheet() {
     const sheets: any[] = Object.values(document.styleSheets);
@@ -15,11 +24,11 @@ export class ColorService {
       this.hljsColors = new ThreeJSColors(this.hljsSheetRef);
     }
   }
-  colorize(atobFile): string {
-    const fileArray = hljs.highlightAuto(atobFile).value.split(/\r\n|\r|\n/);
-    let file = '';
-    fileArray.forEach((fileLine, i) => file = file + '<span class="gpe-file-lines">' + i + '</span>' + fileLine + '\r');
-    return file;
+  loadFont() {
+    this.loader = new THREE.FontLoader();
+    this.loader.load('assets/fonts/courier_prime_sans_regular.typeface.json', font => {
+      this.font = font;
+    });
   }
 }
 

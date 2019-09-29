@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import {DataService} from '../../data.service';
+import {DataService, FileResponse} from '../../data.service';
 import {ColorService} from '../../color.service';
 import {forkJoin} from 'rxjs';
 
@@ -12,15 +12,13 @@ import {forkJoin} from 'rxjs';
   templateUrl: './differ.component.html',
   styleUrls: ['./differ.component.css']
 })
-export class DifferComponent implements OnChanges, AfterViewInit {
+export class DifferComponent implements OnChanges {
   @ViewChild('rendererContainer', { static: true }) rendererContainer: ElementRef;
   @Input('comparison') comparison;
   codeScreens: CodeScreen[];
   files: File[] = [];
   composer: EffectComposer;
   renderer: THREE.WebGLRenderer;
-  font;
-  loader;
   camera;
   scene;
   initialized: boolean;
@@ -35,25 +33,18 @@ export class DifferComponent implements OnChanges, AfterViewInit {
         const refName = file['contents_url'].split('?ref=')[1];
         fileRequests.push(this.data.getFile(file['filename'], refName));
       });
-      forkJoin(fileRequests).subscribe(files => {
+      forkJoin(fileRequests).subscribe((files: FileResponse[]) => {
         if (this.files.length) {this.files = []}
         files.forEach(file => {
           this.files.push(new File(file));
         });
         this.disposeScreens();
-        this.codeScreens.push(new CodeScreen(this.files[0].slab, this.font));
+        const jsOrPySample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
+        this.codeScreens.push(new CodeScreen(jsOrPySample.slab, this.color.font));
+        const jsExample = this.codeScreens.find(screen => screen);
         this.scene.add(this.codeScreens[0].textMesh);
       });
     }
-  }
-  ngAfterViewInit() {
-
-  }
-  loadFont() {
-    this.loader = new THREE.FontLoader();
-    this.loader.load('assets/fonts/courier_prime_sans_regular.typeface.json', font => {
-      this.font = font;
-    });
   }
   initComposer() {
     this.renderer = new THREE.WebGLRenderer();
@@ -79,13 +70,13 @@ export class DifferComponent implements OnChanges, AfterViewInit {
     this.composer.render();
   };
   loadResources() {
-    if (!this.font) {
-      this.loadFont();
+    if (!this.color.font) {
+      this.color.loadFont();
     }
     if (!this.color.hljsSheetRef) {
       this.color.loadhljsSheet();
     }
-    if (!this.initialized && this.font && this.color.hljsSheetRef) {
+    if (!this.initialized && this.color.font && this.color.hljsSheetRef) {
       this.initComposer();
       this.initialized = true;
     }
@@ -102,14 +93,16 @@ export class DifferComponent implements OnChanges, AfterViewInit {
 }
 
 export class File {
-  contents: string;
   slab: string = '';
   fragments: string[];
-  constructor(file, patch?) {
-    this.slab = file;
+  extension: string;
+  constructor(file: FileResponse, patch?) {
+    const fileNameFrags = file.filename.split('.');
+    this.extension = '.' + fileNameFrags[fileNameFrags.length - 1];
+    this.slab = file.data;
     // TODO: apply patch
     if (patch) {
-      this.fragments = file.split(/\n/);
+      this.fragments = file.data.split(/\n/);
       this.fragments.map(frag => {
         this.slab = this.slab + frag.substring(1) + '\n';
       });

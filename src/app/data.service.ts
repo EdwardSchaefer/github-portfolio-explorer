@@ -174,11 +174,16 @@ export class DataService {
       this.constructedTree.next(tree);
     });
   }
-  getFile(path, branchOrRefName): Observable<string> {
+  getFile(path, branchOrRefName): Observable<FileResponse> {
     const url = this.baseURL + '/repos/' + this.username + '/' + this.selectedRepo.name + '/contents/' + path + '?ref=' + branchOrRefName;
     return this.http.get(url, {observe: 'response'}).pipe(
       tap(response => this.updateLimits(response.headers)),
-      map(response => atob(response.body['content']))
+      map(response => {
+          return {
+            filename: response.body['name'],
+            data: atob(response.body['content'])
+        };
+      })
     );
   }
   get data() {
@@ -228,4 +233,9 @@ export class Commit {
 
 export class Tree {
   path: any;
+}
+
+export interface FileResponse {
+  filename: string;
+  data: string;
 }

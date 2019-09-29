@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnChanges, ViewChild} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {FlatTreeControl} from '@angular/cdk/tree';
-import {Branch, DataService} from '../../data.service';
+import {Branch, DataService, FileResponse} from '../../data.service';
 import {DirectoryViewerAnimations} from './directory-viewer-animations';
 import {ColorService} from '../../color.service';
 
@@ -70,9 +70,9 @@ export class DirectoryViewerComponent implements AfterViewInit {
     } else {
       branchName = 'master';
     }
-    this.data.getFile(node['name'], branchName).subscribe(file => {
+    this.data.getFile(node['name'], branchName).subscribe((file: FileResponse) => {
       this.data.selectedPath = node['name'];
-      this.data.selectedFile.next(this.color.colorize(file));
+      this.data.selectedFile.next(this.color.colorize(file.data));
     });
   }
   getFileName(node) {
