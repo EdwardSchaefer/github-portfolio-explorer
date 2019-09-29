@@ -3,6 +3,7 @@ import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {Branch, DataService} from '../../data.service';
 import {DirectoryViewerAnimations} from './directory-viewer-animations';
+import {ColorService} from '../../color.service';
 
 interface FlatNode {
   expandable: boolean;
@@ -37,7 +38,7 @@ export class DirectoryViewerComponent implements AfterViewInit {
   tree: any;
   branches: any[] = [];
   selectedBranch: any;
-  constructor(public data: DataService) {
+  constructor(public data: DataService, public color: ColorService) {
     data.constructedTree.subscribe(selectedData => {
       this.dataSource.data = selectedData;
     });
@@ -69,7 +70,9 @@ export class DirectoryViewerComponent implements AfterViewInit {
     } else {
       branchName = 'master';
     }
-    this.data.getFile(node['name'], branchName);
+    this.data.getFile(node['name'], branchName).subscribe(file => {
+      this.data.selectedFile.next(this.color.colorize(file));
+    });
   }
   getFileName(node) {
     return node.name.split('/')[node['name'].split('/').length - 1];

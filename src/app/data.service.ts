@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import {environment} from '../environments/environment';
 import {ColorService} from './color.service';
+import {map, tap} from 'rxjs/operators';
 
 @Injectable()
 export class DataService {
@@ -174,14 +175,13 @@ export class DataService {
       this.constructedTree.next(tree);
     });
   }
-  getFile(path, branchName) {
+  getFile(path, branchName): Observable<string> {
     this.selectedPath = path;
     const url = this.baseURL + '/repos/' + this.username + '/' + this.selectedRepo.name + '/contents/' + path + '?ref=' + branchName;
-    this.http.get(url, {observe: 'response'}).subscribe(response => {
-      this.updateLimits(response.headers);
-      const atobFile = atob(response.body['content']);
-      this.selectedFile.next(this.color.colorize(atobFile));
-    });
+    return this.http.get(url, {observe: 'response'}).pipe(
+      tap(response => this.updateLimits(response.headers)),
+      map(response => atob(response.body['content']))
+    );
   }
   get data() {
     return this.constructedTree.value;
