@@ -11,8 +11,7 @@ export class DataService {
   selectedPath: string;
   repos: Repo[];
   selectedRepo: Repo;
-  file: string;
-  readme: BehaviorSubject<string>;
+  selectedFile: BehaviorSubject<string>;
   constructedTree: BehaviorSubject<any>;
   branches: BehaviorSubject<Branch[]>;
   commitsStore: any[];
@@ -26,7 +25,7 @@ export class DataService {
     this.constructedTree = new BehaviorSubject<any>([]);
     this.branches = new BehaviorSubject<Branch[]>([]);
     this.commits = new BehaviorSubject<Commit[]>([]);
-    this.readme = new BehaviorSubject<string>('');
+    this.selectedFile = new BehaviorSubject<string>('');
     this.diff = new BehaviorSubject(null);
   }
   getRepos(page) {
@@ -65,20 +64,19 @@ export class DataService {
     this.getReadme(repo);
     this.getBranches(repo);
     this.selectedRepo = repo;
-    this.file = '';
   }
   getReadme(repo) {
     if (repo.readme) {
-      this.readme.next(repo.readme);
+      this.selectedFile.next(repo.readme);
     } else {
       const url = this.baseURL + '/repos/' + this.username + '/'  + repo.name + '/readme';
       this.http.get(url, {responseType: 'text', observe: 'response'}).subscribe(response => {
         this.updateLimits(response.headers);
-        this.file = null;
-        this.readme.next(response.body);
-        repo.readme = response;
+        this.selectedFile.next(response.body);
+        repo.readme = response.body;
       });
     }
+    console.log(repo);
   }
   getBranches(repo: Repo) {
     const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/branches';
@@ -182,7 +180,7 @@ export class DataService {
     this.http.get(url, {observe: 'response'}).subscribe(response => {
       this.updateLimits(response.headers);
       const atobFile = atob(response.body['content']);
-      this.file = this.color.colorize(atobFile);
+      this.selectedFile.next(this.color.colorize(atobFile));
     });
   }
   get data() {

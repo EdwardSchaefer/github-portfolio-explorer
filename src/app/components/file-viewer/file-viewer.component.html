@@ -1,8 +1,5 @@
-<div class="gpe-file-container" *ngIf="data.file">
+<div class="gpe-file-container" *ngIf="htmlData">
   <pre class="gpe-file-contents">
-    <code class="hljs" [innerHTML]="data.file"></code>
+    <code class="hljs" [innerHTML]="htmlData"></code>
   </pre>
-</div>
-<div *ngIf="!data.file">
-  <div *ngIf="data.selectedRepo" [innerHTML]="htmlData"></div>
 </div>

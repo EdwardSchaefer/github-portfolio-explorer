@@ -13,7 +13,6 @@ export class ColorService {
     this.hljsSheetRef = sheets.find(sheet => sheet.href && sheet.href.includes('hljs'));
     if (this.hljsSheetRef) {
       this.hljsColors = new ThreeJSColors(this.hljsSheetRef);
-      console.log(this.hljsColors);
     }
   }
   colorize(atobFile): string {
