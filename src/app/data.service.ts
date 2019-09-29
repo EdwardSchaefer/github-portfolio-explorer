@@ -77,7 +77,6 @@ export class DataService {
         repo.readme = response.body;
       });
     }
-    console.log(repo);
   }
   getBranches(repo: Repo) {
     const url = this.baseURL + '/repos/' + this.username + '/' + repo.name + '/branches';
@@ -175,9 +174,8 @@ export class DataService {
       this.constructedTree.next(tree);
     });
   }
-  getFile(path, branchName): Observable<string> {
-    this.selectedPath = path;
-    const url = this.baseURL + '/repos/' + this.username + '/' + this.selectedRepo.name + '/contents/' + path + '?ref=' + branchName;
+  getFile(path, branchOrRefName): Observable<string> {
+    const url = this.baseURL + '/repos/' + this.username + '/' + this.selectedRepo.name + '/contents/' + path + '?ref=' + branchOrRefName;
     return this.http.get(url, {observe: 'response'}).pipe(
       tap(response => this.updateLimits(response.headers)),
       map(response => atob(response.body['content']))

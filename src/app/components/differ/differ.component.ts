@@ -5,6 +5,7 @@ import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import {DataService} from '../../data.service';
 import {ColorService} from '../../color.service';
+import {forkJoin} from 'rxjs';
 
 @Component({
   selector: 'gpe-differ',
@@ -27,30 +28,22 @@ export class DifferComponent implements OnChanges, AfterViewInit {
     this.codeScreens = [];
   }
   ngOnChanges() {
-    if (!this.font) {
-      this.loadFont();
-    }
-    if (!this.color.hljsSheetRef) {
-      this.color.loadhljsSheet();
-    }
-    if (!this.initialized && this.font && this.color.hljsSheetRef) {
-      this.initComposer();
-      this.initialized = true;
-    }
+    this.loadResources();
     if (this.initialized && this.comparison) {
+      const fileRequests = [];
       this.comparison.files.map(file => {
-        if (this.files.length) {this.files = []}
-        this.files.push(new File(file));
+        const refName = file['contents_url'].split('?ref=')[1];
+        fileRequests.push(this.data.getFile(file['filename'], refName));
       });
-      if (this.codeScreens.length) {
-        this.codeScreens.forEach(codeScreen => codeScreen.dispose());
-        this.codeScreens = [];
-        while (this.scene.children.length > 0) {
-          this.scene.remove(this.scene.children[0]);
-        }
-      }
-      this.codeScreens.push(new CodeScreen(this.files[0].slab, this.font));
-      this.scene.add(this.codeScreens[0].textMesh);
+      forkJoin(fileRequests).subscribe(files => {
+        if (this.files.length) {this.files = []}
+        files.forEach(file => {
+          this.files.push(new File(file));
+        });
+        this.disposeScreens();
+        this.codeScreens.push(new CodeScreen(this.files[0].slab, this.font));
+        this.scene.add(this.codeScreens[0].textMesh);
+      });
     }
   }
   ngAfterViewInit() {
@@ -84,15 +77,39 @@ export class DifferComponent implements OnChanges, AfterViewInit {
     requestAnimationFrame(this.animate);
     this.codeScreens.forEach(codeScreen => codeScreen.textMesh.rotation.y += 0.001);
     this.composer.render();
+  };
+  loadResources() {
+    if (!this.font) {
+      this.loadFont();
+    }
+    if (!this.color.hljsSheetRef) {
+      this.color.loadhljsSheet();
+    }
+    if (!this.initialized && this.font && this.color.hljsSheetRef) {
+      this.initComposer();
+      this.initialized = true;
+    }
+  }
+  disposeScreens() {
+    if (this.codeScreens.length) {
+      this.codeScreens.forEach(codeScreen => codeScreen.dispose());
+      this.codeScreens = [];
+      while (this.scene.children.length > 0) {
+        this.scene.remove(this.scene.children[0]);
+      }
+    }
   }
 }
 
 export class File {
+  contents: string;
   slab: string = '';
   fragments: string[];
-  constructor(fileData) {
-    if (fileData['patch']) {
-      this.fragments = fileData['patch'].split(/\n/);
+  constructor(file, patch?) {
+    this.slab = file;
+    // TODO: apply patch
+    if (patch) {
+      this.fragments = file.split(/\n/);
       this.fragments.map(frag => {
         this.slab = this.slab + frag.substring(1) + '\n';
       });

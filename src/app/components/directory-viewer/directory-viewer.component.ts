@@ -71,6 +71,7 @@ export class DirectoryViewerComponent implements AfterViewInit {
       branchName = 'master';
     }
     this.data.getFile(node['name'], branchName).subscribe(file => {
+      this.data.selectedPath = node['name'];
       this.data.selectedFile.next(this.color.colorize(file));
     });
   }
