@@ -12,8 +12,10 @@ export class ColorService {
     this.loadhljsSheet();
   }
   colorize(atobFile): string {
-    const fileArray = hljs.highlightAuto(atobFile).value.split(/\r\n|\r|\n/);
-    let file = '';
+    return hljs.highlightAuto(atobFile).value;
+  }
+  addLines(file): string {
+    const fileArray = file.split(/\r\n|\r|\n/);
     fileArray.forEach((fileLine, i) => file = file + '<span class="gpe-file-lines">' + i + '</span>' + fileLine + '\r');
     return file;
   }
@@ -34,9 +36,17 @@ export class ColorService {
 
 export class ThreeJSColors {
   background: string;
+  rules: {} = {};
   constructor(hljsSheet) {
     const rules: any[] = Object.values(hljsSheet.rules);
-    const hljsRule = rules.find(rule => rule.selectorText === '.hljs');
-    this.background = hljsRule.style.background;
+    const backgroundRule = rules.find(rule => rule.selectorText === '.hljs');
+    this.background = backgroundRule.style.background;
+    rules.forEach(rule => {
+      if (Object.values(rule.style).includes('color')) {
+        rule.selectorText.split(', ').forEach(selector => {
+          this.rules[selector] = rule.style.color;
+        });
+      }
+    });
   }
 }

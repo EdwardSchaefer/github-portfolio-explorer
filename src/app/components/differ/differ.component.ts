@@ -39,9 +39,8 @@ export class DifferComponent implements OnChanges {
           this.files.push(new File(file));
         });
         this.disposeScreens();
-        const jsOrPySample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
-        this.codeScreens.push(new CodeScreen(jsOrPySample.slab, this.color.font));
-        const jsExample = this.codeScreens.find(screen => screen);
+        const sample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
+        this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.colorize));
         this.scene.add(this.codeScreens[0].textMesh);
       });
     }
@@ -115,7 +114,7 @@ export class CodeScreen {
   geometry;
   color = 0x44ff88;
   textMesh;
-  constructor(message, font) {
+  constructor(message, font, colorize) {
     this.material = new THREE.MeshBasicMaterial({
       color: this.color,
       transparent: false,
