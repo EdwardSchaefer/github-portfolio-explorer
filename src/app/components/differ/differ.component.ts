@@ -40,7 +40,7 @@ export class DifferComponent implements OnChanges {
         });
         this.disposeScreens();
         const sample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
-        this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.colorize));
+        this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.colorize, 1));
         this.scene.add(this.codeScreens[0].textMesh);
       });
     }
@@ -114,7 +114,8 @@ export class CodeScreen {
   geometry;
   color = 0x44ff88;
   textMesh;
-  constructor(message, font, colorize) {
+  constructor(message: string, font, colorize, shapeDetail?: number) {
+    shapeDetail = shapeDetail || 12;
     this.material = new THREE.MeshBasicMaterial({
       color: this.color,
       transparent: false,
@@ -122,7 +123,7 @@ export class CodeScreen {
       side: THREE.DoubleSide
     });
     const shapes = font.generateShapes(message, 10, 1);
-    this.geometry = new THREE.ShapeBufferGeometry(shapes);
+    this.geometry = new THREE.ShapeBufferGeometry(shapes, shapeDetail);
     this.geometry.computeBoundingBox();
     // offset left column
     const xMid = this.geometry.boundingBox.min.x - this.geometry.boundingBox.max.x;
