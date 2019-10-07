@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as hljs from 'highlight.js';
+import * as low from 'lowlight';
 import * as THREE from 'three';
 
 @Injectable()
@@ -11,7 +12,10 @@ export class ColorService {
   constructor() {
     this.loadhljsSheet();
   }
-  colorize(atobFile): string {
+  lowlight(atobFile) {
+    return low.highlightAuto(atobFile);
+  }
+  highlight(atobFile): string {
     return hljs.highlightAuto(atobFile).value;
   }
   addLines(file): string {
