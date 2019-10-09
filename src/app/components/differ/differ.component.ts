@@ -40,13 +40,13 @@ export class DifferComponent implements OnChanges {
         });
         this.disposeScreens();
         const sample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
-        this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, 1));
+        this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, this.color.hljsColors, 1));
         this.scene.add(this.codeScreens[0].textMesh);
       });
     }
   }
   initComposer() {
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({antialias: true});
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
@@ -110,30 +110,71 @@ export class File {
 }
 
 export class CodeScreen {
-  material;
   geometry;
   color = 0x44ff88;
   textMesh;
-  constructor(message: string, font, lowlight, shapeDetail?: number) {
+  lowlightMap: LowlightMap;
+  constructor(message: string, font, lowlight, colors,  shapeDetail?: number) {
     shapeDetail = shapeDetail || 12;
-    this.material = new THREE.MeshBasicMaterial({
-      color: this.color,
-      transparent: false,
-      opacity: 0.5,
-      side: THREE.DoubleSide
-    });
-    const shapes = font.generateShapes(message, 10, 1);
+    const shapes = font.generateShapes(message, 5, 1);
     this.geometry = new THREE.ShapeBufferGeometry(shapes, shapeDetail);
     this.geometry.computeBoundingBox();
+    this.lowlightMap = new LowlightMap(this.geometry, colors, lowlight(message).value, font);
     // offset left column
     const xMid = this.geometry.boundingBox.min.x - this.geometry.boundingBox.max.x;
     const yMid = (this.geometry.boundingBox.max.y - this.geometry.boundingBox.min.y) / 2;
     this.geometry.translate(xMid, yMid, 0);
-    this.textMesh = new THREE.Mesh(this.geometry, this.material);
+    this.textMesh = new THREE.Mesh(this.lowlightMap.geometry, this.lowlightMap.threeMats);
     this.textMesh.position.z = -150;
   }
   dispose() {
-    if (this.material) {this.material.dispose()}
+    if (this.lowlightMap.threeMats.length) {this.lowlightMap.threeMats.forEach(mat => mat.dispose())}
     if (this.geometry) {this.geometry.dispose()}
+    if (this.lowlightMap.geometry) {this.lowlightMap.geometry.dispose()}
+  }
+}
+
+export class LowlightMap {
+  geometry: any;
+  materials: any[] = [];
+  colorLengths: any[] = [];
+  llMap = (children: any[], classname: string, font: any) => {
+    children.forEach(child => {
+      if (child.type === 'text') {
+        const groupLength = font.generateShapes(child.value, 10, 1).length;
+        this.colorLengths.push({groupLength: groupLength, className: classname});
+      } else {
+        this.llMap(child.children, child.properties.className[0], font);
+      }
+    });
+  };
+  constructor(geometry, colors, llResult, font) {
+    this.geometry = geometry;
+    this.llMap(llResult, 'hljs', font);
+    let currentIndex = 0;
+    this.colorLengths.forEach(cl => {
+      if (this.materials.map(material => material.hljsName).includes(cl.className)) {
+        for (let i = 0; i < cl.groupLength; i++) {
+          this.geometry.groups[currentIndex].materialIndex = this.materials.findIndex(material => material.hljsName === cl.className);
+          currentIndex++;
+        }
+      } else {
+        this.materials.push({
+          hljsName: cl.className,
+          threeMat: new THREE.MeshBasicMaterial({
+            color: colors.rules['.' + cl.className] || 0xff0000,
+            transparent: false,
+            side: THREE.DoubleSide
+          })
+        });
+        for (let i = 0; i < cl.groupLength; i++) {
+          this.geometry.groups[currentIndex].materialIndex = this.materials.length - 1;
+          currentIndex++;
+        }
+      }
+    });
+  }
+  get threeMats() {
+    return this.materials.map(material => material.threeMat);
   }
 }
