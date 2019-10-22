@@ -22,6 +22,7 @@ export class DifferComponent implements OnChanges {
   camera;
   scene;
   initialized: boolean;
+  scaling = 1;
   constructor(public data: DataService, public color: ColorService) {
     this.codeScreens = [];
   }
@@ -40,7 +41,7 @@ export class DifferComponent implements OnChanges {
         });
         this.disposeScreens();
         const sample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
-        this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, this.color.hljsColors, 1));
+        this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, this.color.hljsColors, this.scaling, 1));
         this.scene.add(this.codeScreens[0].textMesh);
       });
     }
@@ -50,16 +51,12 @@ export class DifferComponent implements OnChanges {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
-    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2500);
-    this.camera.position.z = 900;
+    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, (this.scaling * 50));
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(this.color.hljsColors.background);
     this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass( new RenderPass(this.scene, this.camera));
-    // const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0, 0, 0);
-    // bloomPass.threshold = 0;
-    // bloomPass.strength = 1.5;
-    // bloomPass.radius = 0.1;
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    // const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.1, 0);
     // this.composer.addPass(bloomPass);
     this.animate();
   }
@@ -114,18 +111,18 @@ export class CodeScreen {
   color = 0x44ff88;
   textMesh;
   lowlightMap: LowlightMap;
-  constructor(message: string, font, lowlight, colors,  shapeDetail?: number) {
+  constructor(message: string, font, lowlight, colors, scaling: number, shapeDetail?: number) {
     shapeDetail = shapeDetail || 12;
-    const shapes = font.generateShapes(message, 5, 1);
+    const shapes = font.generateShapes(message, (scaling * 0.1), 1);
     this.geometry = new THREE.ShapeBufferGeometry(shapes, shapeDetail);
     this.geometry.computeBoundingBox();
-    this.lowlightMap = new LowlightMap(this.geometry, colors, lowlight(message).value, font);
+    this.lowlightMap = new LowlightMap(this.geometry, colors, lowlight(message).value, font, scaling);
     // offset left column
     const xMid = this.geometry.boundingBox.min.x - this.geometry.boundingBox.max.x;
     const yMid = (this.geometry.boundingBox.max.y - this.geometry.boundingBox.min.y) / 2;
     this.geometry.translate(xMid, yMid, 0);
     this.textMesh = new THREE.Mesh(this.lowlightMap.geometry, this.lowlightMap.threeMats);
-    this.textMesh.position.z = -150;
+    this.textMesh.position.z = xMid - yMid;
   }
   dispose() {
     if (this.lowlightMap.threeMats.length) {this.lowlightMap.threeMats.forEach(mat => mat.dispose())}
@@ -138,19 +135,19 @@ export class LowlightMap {
   geometry: any;
   materials: any[] = [];
   colorLengths: any[] = [];
-  llMap = (children: any[], classname: string, font: any) => {
+  llMap = (children: any[], classname: string, font: any, scaling: number) => {
     children.forEach(child => {
       if (child.type === 'text') {
-        const groupLength = font.generateShapes(child.value, 10, 1).length;
+        const groupLength = font.generateShapes(child.value, (scaling * 10), 1).length;
         this.colorLengths.push({groupLength: groupLength, className: classname});
       } else {
-        this.llMap(child.children, child.properties.className[0], font);
+        this.llMap(child.children, child.properties.className[0], font, scaling);
       }
     });
   };
-  constructor(geometry, colors, llResult, font) {
+  constructor(geometry, colors, llResult, font, scaling) {
     this.geometry = geometry;
-    this.llMap(llResult, 'hljs', font);
+    this.llMap(llResult, 'hljs', font, scaling);
     let currentIndex = 0;
     this.colorLengths.forEach(cl => {
       if (this.materials.map(material => material.hljsName).includes(cl.className)) {
