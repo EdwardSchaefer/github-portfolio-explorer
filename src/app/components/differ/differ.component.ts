@@ -6,6 +6,7 @@ import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass
 import {DataService, FileResponse} from '../../data.service';
 import {ColorService} from '../../color.service';
 import {forkJoin} from 'rxjs';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 
 @Component({
   selector: 'gpe-differ',
@@ -20,6 +21,7 @@ export class DifferComponent implements OnChanges {
   composer: EffectComposer;
   renderer: THREE.WebGLRenderer;
   camera;
+  controls;
   scene;
   initialized: boolean;
   scaling = 1;
@@ -43,6 +45,9 @@ export class DifferComponent implements OnChanges {
         const sample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
         this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, this.color.hljsColors, this.scaling, 1));
         this.scene.add(this.codeScreens[0].textMesh);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.target = new THREE.Vector3(0, 0, this.codeScreens[0].textMesh.position.z);
+        this.controls.update();
       });
     }
   }
@@ -62,7 +67,7 @@ export class DifferComponent implements OnChanges {
   }
   animate = () => {
     requestAnimationFrame(this.animate);
-    this.codeScreens.forEach(codeScreen => codeScreen.textMesh.rotation.y += 0.001);
+    // this.codeScreens.forEach(codeScreen => codeScreen.textMesh.rotation.y += 0.001);
     this.composer.render();
   };
   loadResources() {
