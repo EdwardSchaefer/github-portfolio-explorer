@@ -7,6 +7,7 @@ import {DataService, FileResponse} from '../../data.service';
 import {ColorService} from '../../color.service';
 import {forkJoin} from 'rxjs';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import {BokehPassHelper} from './gui';
 
 @Component({
   selector: 'gpe-differ',
@@ -61,6 +62,8 @@ export class DifferComponent implements OnChanges {
     this.scene.background = new THREE.Color(this.color.hljsColors.background);
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
+    const helper = new BokehPassHelper(this.scene, this.camera);
+    this.composer.addPass(helper.guiHelper.pass);
     // const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.1, 0);
     // this.composer.addPass(bloomPass);
     this.animate();
