@@ -74,8 +74,8 @@ export class DifferComponent implements OnChanges, OnInit {
     this.scene.background = new THREE.Color(this.color.hljsColors.background);
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
-    const helper = new BokehPassHelper(this.scene, this.camera);
-    this.composer.addPass(helper.guiHelper.pass);
+    // const helper = new BokehPassHelper(this.scene, this.camera);
+    // this.composer.addPass(helper.guiHelper.pass);
     // const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.1, 0);
     // this.composer.addPass(bloomPass);
     this.animate();
@@ -176,14 +176,9 @@ export class LowlightMap {
           currentIndex++;
         }
       } else {
-        console.log(colors);
         this.materials.push({
           hljsName: cl.className,
-          threeMat: new THREE.MeshBasicMaterial({
-            color: colors.rules['.' + cl.className] || 0xff0000,
-            transparent: false,
-            side: THREE.DoubleSide
-          })
+          threeMat: meshDepth
         });
         for (let i = 0; i < cl.groupLength; i++) {
           this.geometry.groups[currentIndex].materialIndex = this.materials.length - 1;
@@ -196,3 +191,15 @@ export class LowlightMap {
     return this.materials.map(material => material.threeMat);
   }
 }
+
+const meshDepth = new THREE.MeshDepthMaterial({
+  opacity: 1,
+  wireframe: false,
+  wireframeLinewidth: 1
+})
+
+const meshBasic = (colors, cl) => new THREE.MeshBasicMaterial({
+  color: colors.rules['.' + cl.className] || 0xff0000,
+  transparent: false,
+  side: THREE.DoubleSide
+})
