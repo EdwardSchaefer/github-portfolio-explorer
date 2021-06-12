@@ -34,7 +34,7 @@ export class ColorService {
     this.loader = new THREE.FontLoader();
     this.loader.load('assets/fonts/courier_prime_sans_regular.typeface.json', font => {
       this.font = font;
-    });
+    })
   }
 }
 

@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, AfterViewInit, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, OnChanges, ViewChild, ElementRef, OnInit} from '@angular/core';
 import * as THREE from 'three';
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
@@ -8,13 +8,14 @@ import {ColorService} from '../../color.service';
 import {forkJoin} from 'rxjs';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import {BokehPassHelper} from './gui';
+import {fileRef} from 'src/app/components/differ/fileRef';
 
 @Component({
   selector: 'gpe-differ',
   templateUrl: './differ.component.html',
   styleUrls: ['./differ.component.css']
 })
-export class DifferComponent implements OnChanges {
+export class DifferComponent implements OnChanges, OnInit {
   @ViewChild('rendererContainer', { static: true }) rendererContainer: ElementRef;
   @Input('comparison') comparison;
   codeScreens: CodeScreen[];
@@ -29,28 +30,39 @@ export class DifferComponent implements OnChanges {
   constructor(public data: DataService, public color: ColorService) {
     this.codeScreens = [];
   }
+  ngOnInit() {
+    this.color.loadFont();
+    setTimeout(() => {
+      this.color.loadhljsSheet();
+      this.initComposer();
+      this.fjCallback([fileRef]);
+    }, 3000)
+  }
   ngOnChanges() {
-    this.loadResources();
-    if (this.initialized && this.comparison) {
-      const fileRequests = [];
-      this.comparison.files.map(file => {
-        const refName = file['contents_url'].split('?ref=')[1];
-        fileRequests.push(this.data.getFile(file['filename'], refName));
-      });
-      forkJoin(fileRequests).subscribe((files: FileResponse[]) => {
-        if (this.files.length) {this.files = []}
-        files.forEach(file => {
-          this.files.push(new File(file));
-        });
-        this.disposeScreens();
-        const sample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
-        this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, this.color.hljsColors, this.scaling, 1));
-        this.scene.add(this.codeScreens[0].textMesh);
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.target = new THREE.Vector3(0, 0, this.codeScreens[0].textMesh.position.z);
-        this.controls.update();
-      });
-    }
+    // this.loadResources();
+    // if (this.initialized && this.comparison) {
+    //   const fileRequests = [];
+    //   this.comparison.files.map(file => {
+    //     const refName = file['contents_url'].split('?ref=')[1];
+    //     fileRequests.push(this.data.getFile(file['filename'], refName));
+    //   });
+    //   forkJoin(fileRequests).subscribe((files: FileResponse[]) => {
+    //     this.fjCallback(files);
+    //   });
+    // }
+  }
+  fjCallback(files) {
+    if (this.files.length) {this.files = []}
+    files.forEach(file => {
+      this.files.push(new File(file));
+    });
+    this.disposeScreens();
+    const sample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
+    this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, this.color.hljsColors, this.scaling, 1));
+    this.scene.add(this.codeScreens[0].textMesh);
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.target = new THREE.Vector3(0, 0, this.codeScreens[0].textMesh.position.z);
+    this.controls.update();
   }
   initComposer() {
     this.renderer = new THREE.WebGLRenderer({antialias: true});
@@ -164,6 +176,7 @@ export class LowlightMap {
           currentIndex++;
         }
       } else {
+        console.log(colors);
         this.materials.push({
           hljsName: cl.className,
           threeMat: new THREE.MeshBasicMaterial({
