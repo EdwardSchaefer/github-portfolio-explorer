@@ -1,7 +1,8 @@
 import {Component, Input, OnChanges, ViewChild, ElementRef, OnInit} from '@angular/core';
 import * as THREE from 'three';
-import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
-import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
+// import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
+// import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
+import { BloomEffect, EffectComposer, EffectPass, RenderPass } from "postprocessing";
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import {DataService, FileResponse} from '../../data.service';
 import {ColorService} from '../../color.service';
@@ -65,7 +66,7 @@ export class DifferComponent implements OnChanges, OnInit {
     this.controls.update();
   }
   initComposer() {
-    this.renderer = new THREE.WebGLRenderer({antialias: true});
+    this.renderer = new THREE.WebGLRenderer({antialias: false});
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
@@ -178,7 +179,7 @@ export class LowlightMap {
       } else {
         this.materials.push({
           hljsName: cl.className,
-          threeMat: meshDepth
+          threeMat: meshBasic(colors, cl)
         });
         for (let i = 0; i < cl.groupLength; i++) {
           this.geometry.groups[currentIndex].materialIndex = this.materials.length - 1;
