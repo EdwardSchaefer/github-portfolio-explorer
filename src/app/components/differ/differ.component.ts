@@ -9,7 +9,9 @@ import {ColorService} from '../../color.service';
 import {forkJoin} from 'rxjs';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import {BokehPassHelper} from './gui';
+import {DofPostProcessingHelper} from "./ppDof";
 import {fileRef} from 'src/app/components/differ/fileRef';
+import {BloomPostProcessingHelper} from "./ppBloom";
 
 @Component({
   selector: 'gpe-differ',
@@ -75,6 +77,10 @@ export class DifferComponent implements OnChanges, OnInit {
     this.scene.background = new THREE.Color(this.color.hljsColors.background);
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
+    const bloomHelper = new BloomPostProcessingHelper(this.composer, this.camera);
+    this.composer.addPass(bloomHelper.effectPass);
+    const DofHelper = new DofPostProcessingHelper(this.composer, this.camera);
+    this.composer.addPass(DofHelper.effectPass);
     // const helper = new BokehPassHelper(this.scene, this.camera);
     // this.composer.addPass(helper.guiHelper.pass);
     // const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.1, 0);
