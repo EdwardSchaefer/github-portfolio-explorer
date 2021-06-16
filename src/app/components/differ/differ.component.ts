@@ -138,15 +138,30 @@ export class CodeScreen {
   color = 0x44ff88;
   textMesh;
   lowlightMap: LowlightMap;
+  minifyWidth = 100;
   constructor(message: string, font, lowlight, colors, scaling: number, shapeDetail?: number) {
+    let result = '';
     shapeDetail = shapeDetail || 12;
-    const shapes = font.generateShapes(message, (scaling * 0.1), 1);
-    this.geometry = new THREE.ShapeBufferGeometry(shapes, shapeDetail);
+    if (this.minifyWidth) {
+      message = message.replace(/(\r|\n|\r\n|\s|\t)/g, '');
+      let i = 0
+      while (i < message.length / this.minifyWidth) {
+        const length = i * this.minifyWidth;
+        result = result + message.substring(length, length + this.minifyWidth) + '\n';
+        i = i + 1;
+      }
+    } else {
+      result = message;
+    }
+    const minShapes = font.generateShapes(result, (scaling * 0.1), 1);
+    this.geometry = new THREE.ShapeBufferGeometry(minShapes, shapeDetail);
     this.geometry.computeBoundingBox();
-    this.lowlightMap = new LowlightMap(this.geometry, colors, lowlight(message).value, font, scaling);
+    this.lowlightMap = new LowlightMap(this.geometry, colors, message, lowlight, font, scaling, this.minifyWidth);
     // offset left column
-    const xMid = this.geometry.boundingBox.min.x - this.geometry.boundingBox.max.x;
-    const yMid = (this.geometry.boundingBox.max.y - this.geometry.boundingBox.min.y) / 2;
+    // const xMid = this.geometry.boundingBox.min.x - this.geometry.boundingBox.max.x;
+    // const yMid = (this.geometry.boundingBox.max.y - this.geometry.boundingBox.min.y) / 2;
+    const xMid = -9;
+    const yMid = 2;
     this.geometry.translate(xMid, yMid, 0);
     this.textMesh = new THREE.Mesh(this.lowlightMap.geometry, this.lowlightMap.threeMats);
     this.textMesh.position.z = xMid - yMid;
@@ -172,15 +187,18 @@ export class LowlightMap {
       }
     });
   };
-  constructor(geometry, colors, llResult, font, scaling) {
+  constructor(geometry, colors, message, lowlight, font, scaling, minifyWidth) {
     this.geometry = geometry;
+    const llResult = lowlight(message).value
     this.llMap(llResult, 'hljs', font, scaling);
     let currentIndex = 0;
     this.colorLengths.forEach(cl => {
       if (this.materials.map(material => material.hljsName).includes(cl.className)) {
         for (let i = 0; i < cl.groupLength; i++) {
-          this.geometry.groups[currentIndex].materialIndex = this.materials.findIndex(material => material.hljsName === cl.className);
-          currentIndex++;
+          if (this.geometry.groups[currentIndex]) {
+            this.geometry.groups[currentIndex].materialIndex = this.materials.findIndex(material => material.hljsName === cl.className);
+            currentIndex++;
+          }
         }
       } else {
         this.materials.push({
