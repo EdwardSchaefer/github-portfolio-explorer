@@ -61,7 +61,8 @@ export class DifferComponent implements OnChanges, OnInit {
     });
     this.disposeScreens();
     const sample = this.files.find(file => ['.js', '.py', '.ts'].includes(file.extension)) || this.files[0];
-    this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, this.color.hljsColors, this.scaling, 1));
+    const ratio = this.rendererContainer.nativeElement.getBoundingClientRect().width / this.rendererContainer.nativeElement.getBoundingClientRect().height;
+    this.codeScreens.push(new CodeScreen(sample.slab, this.color.font, this.color.lowlight, this.color.hljsColors, this.scaling, ratio, 1));
     this.scene.add(this.codeScreens[0].textMesh);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target = new THREE.Vector3(0, 0, this.codeScreens[0].textMesh.position.z);
@@ -138,13 +139,16 @@ export class CodeScreen {
   color = 0x44ff88;
   textMesh;
   lowlightMap: LowlightMap;
-  minifyWidth = 100;
-  constructor(message: string, font, lowlight, colors, scaling: number, shapeDetail?: number) {
+  minify = true;
+  minifyWidth: number;
+  constructor(message: string, font, lowlight, colors, scaling: number, ratio: number, shapeDetail?: number) {
     let result = '';
     shapeDetail = shapeDetail || 12;
-    if (this.minifyWidth) {
+    if (this.minify) {
       message = message.replace(/(\r|\n|\r\n|\s|\t)/g, '');
-      let i = 0
+      const coef = 1.5;
+      this.minifyWidth = Math.sqrt(ratio * message.length) * coef;
+      let i = 0;
       while (i < message.length / this.minifyWidth) {
         const length = i * this.minifyWidth;
         result = result + message.substring(length, length + this.minifyWidth) + '\n';
@@ -156,6 +160,8 @@ export class CodeScreen {
     const minShapes = font.generateShapes(result, (scaling * 0.1), 1);
     this.geometry = new THREE.ShapeBufferGeometry(minShapes, shapeDetail);
     this.geometry.computeBoundingBox();
+    const bBox = this.geometry.boundingBox;
+    const bBoxRatio = (bBox.min.x - bBox.max.x) / (bBox.min.y - bBox.max.y);
     this.lowlightMap = new LowlightMap(this.geometry, colors, message, lowlight, font, scaling, this.minifyWidth);
     // offset left column
     // const xMid = this.geometry.boundingBox.min.x - this.geometry.boundingBox.max.x;
