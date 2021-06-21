@@ -66,7 +66,7 @@ export class DifferComponent implements OnChanges, OnInit {
     this.scene.add(this.codeScreens[0].textMesh);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target = new THREE.Vector3(0, 0, this.codeScreens[0].textMesh.position.z);
-    this.controls.update();
+    // this.controls.update();
   }
   initComposer() {
     this.renderer = new THREE.WebGLRenderer({antialias: false});
@@ -161,13 +161,10 @@ export class CodeScreen {
     this.geometry = new THREE.ShapeBufferGeometry(minShapes, shapeDetail);
     this.geometry.computeBoundingBox();
     const bBox = this.geometry.boundingBox;
-    const bBoxRatio = (bBox.min.x - bBox.max.x) / (bBox.min.y - bBox.max.y);
     this.lowlightMap = new LowlightMap(this.geometry, colors, message, lowlight, font, scaling, this.minifyWidth);
     // offset left column
-    // const xMid = this.geometry.boundingBox.min.x - this.geometry.boundingBox.max.x;
-    // const yMid = (this.geometry.boundingBox.max.y - this.geometry.boundingBox.min.y) / 2;
-    const xMid = -9;
-    const yMid = 2;
+    const xMid = (bBox.min.x - bBox.max.x) / 2;
+    const yMid = (bBox.max.y - bBox.min.y) / 2;
     this.geometry.translate(xMid, yMid, 0);
     this.textMesh = new THREE.Mesh(this.lowlightMap.geometry, this.lowlightMap.threeMats);
     this.textMesh.position.z = xMid - yMid;
